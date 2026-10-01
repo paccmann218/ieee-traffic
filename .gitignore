@@ -1,0 +1,10 @@
+.aws_keys/
+data/
+repo/
+report/
+__pycache__/
+*.pyc
+*.pem
+*.npz
+.venv/
+venv/
