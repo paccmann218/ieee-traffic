@@ -1,22 +1,13 @@
 % Standalone render of the architecture diagram for the README.
-% Build: pdflatex architecture_standalone.tex, then rasterize (see docs/scripts/render_architecture.py).
-\documentclass[border=8pt]{standalone}
+% Build: pdflatex architecture_standalone, then python ../scripts/render_architecture.py
+\documentclass[border=6pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{libertinus}
 \usepackage{libertinust1math}
 \usepackage{amsmath}
-\usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric}
-\definecolor{ink2}{HTML}{52514E}
-\definecolor{rulec}{HTML}{C3C2B7}
-\definecolor{deep}{HTML}{163A6B}
-\definecolor{panel2}{HTML}{F7F6F2}
-\definecolor{statec}{HTML}{2A78D6}
-\definecolor{queuec}{HTML}{EB6834}
-\definecolor{odmec}{HTML}{1BAF7A}
-\definecolor{physc}{HTML}{6250D6}
+\usetikzlibrary{arrows.meta,positioning,calc}
 \newcommand{\SFD}{S_{\mathrm{FD}}}
 \newcommand{\SLWR}{S_{\mathrm{LWR}}}
 \begin{document}

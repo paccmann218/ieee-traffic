@@ -17,9 +17,10 @@ in the per-lane units of \cref{eq:state}. Interpolation is a strong prior on sho
 has to learn when and how it is wrong.
 
 \subsection{Baselines}
-The organizer baseline predicts a weekday $\times$ time-of-day profile per link and scores $\Sstate=0.6929$ in public.
+The organizer baseline predicts a weekday $\times$ time-of-day profile per link and scores $\Sstate=0.6929$ on the
+validation month.
 Same-day interpolation is far stronger, because most gaps are short: of the 3.44 million February training targets,
-3.14 million have both anchors within six slots (\cref{fig:state-gaps}). The adaptive smoothing method of
+3.14 million have both anchors within six slots (\cref{fig:state-error}). The adaptive smoothing method of
 Treiber and Helbing \cite{treiber2002} (ASM) supplies a third estimate. It averages anchors with two exponential
 kernels aligned with the free-flow and congested characteristics,
 \begin{equation}
@@ -119,7 +120,7 @@ corrections act only there; none enforces the diagram or conservation exactly.
 The deployed gate FS1 widens the region to $v_0>0.85\,v_f$ and $q_0<0.9$ capacity, evaluated on the S5 output
 $(v_0,q_0)$, and blends at half strength: $q=\tfrac12 q_0+\tfrac12 q^{\mathrm{factor}}$ and
 $v=\mathrm{clip}(\tfrac12 v_0+\tfrac12 v^{\mathrm{cond}},5,140)$. On February the fixed half-strength arm beat its
-predecessor on every panel (joint proxy gain +0.000156). The public board measured S10/S12 at +0.00151 (CT2 against CT1,
+predecessor on every panel (joint proxy gain +0.000156). On the validation month S10/S12 added 0.00151 (CT2 against CT1,
 state only); FS1 shipped together with a queue change.
 
 \subsection{A fixed three-member sample ensemble}\label{sec:ensemble}
@@ -137,12 +138,12 @@ no weight tuned after a score was seen.
 
 The protocol of \cref{sec:protocol} was registered before fitting. \Cref{tab:ts3} shows the development and
 confirmation results against a control that reproduced the parent exactly; the rule was then refit on all nine
-months and shipped as TF3, which measured +0.00034 in public.
+months and shipped as TF3, which raised the validation score by 0.00034.
 
 \begin{table}[h]
 \centering\small
 \caption{TS3 against its exact parent on held-out TRAIN months (models fitted on June--November). All ten panels
-improved in every month. TRAIN proxies, not leaderboard scores.}\label{tab:ts3}
+improved in every month. Training proxies, not validation scores.}\label{tab:ts3}
 \begin{tabular}{@{}l r r r r@{}}
 \toprule
 Month (role) & $\Delta\Sstate$ & $\Delta S_{\mathrm{phys}}^{\mathrm{proxy}}$ & $\Delta(0.35\,\Sstate+0.15\,S_{\mathrm{phys}}^{\mathrm{proxy}})$ & Panels improved \\
@@ -183,57 +184,69 @@ March link offset of the flow interpolant (10.9 veh/h RMS) missed its 20 veh/h b
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_gap_ladder.pdf}
-\caption{The bias test that decided which shells were written. Bars: February mean absolute link bias of the
-same-day interpolant, pooled over panels; dots: individual panels. Shells 1--6 passed and were written in three
-submissions. Shell 7 passed but no March or April link had the 100 cells the writing rule requires.}\label{fig:gap-ladder}
+\caption{February mean absolute link bias of the same-day interpolant by gap shell. Bars pool all panels; circles
+show individual panels; the dashed line is the 0.15 km/h acceptance threshold. Shells 1 to 6 were written (in ES2,
+ES3 and ES4). Shell 7 passed the test, but no March or April link reached the 100 cells required by the writing
+rule. The bar for shells 25 to 48 is truncated.}\label{fig:gap-ladder}
 \end{figure}
 
 \begin{table}[h]
 \centering\small
-\caption{The gap-shell ladder. February columns are TRAIN proxies; ``changed'' counts March and April speeds;
-public $\Delta$ is the Kaggle change of the submission that wrote the shell.}\label{tab:ladder}
+\caption{Gap-shell results. February columns are training proxies; ``speeds changed'' counts March and April cells;
+$\Delta$ is the change in validation score of the submission that wrote the shell.}\label{tab:ladder}
 \begin{tabular}{@{}l r r r r l@{}}
 \toprule
-Shell (slots) & Feb.\ link bias & Feb.\ RMSE raw $\rightarrow$ corrected & Speeds changed & Mean $|\Delta v|$ & Public $\Delta$ \\
+Shell (slots) & Feb.\ link bias & Feb.\ RMSE, raw / corrected & Speeds changed & Mean $|\Delta v|$ & $\Delta$ \\
 \midrule
-1        & $\approx$0.02 & unchanged & 1,715,267 & 0.962 & +0.00039 (ES2) \\
-2        & 0.028 & 2.560 $\rightarrow$ 2.560 & 1,918,477 & 0.960 & +0.00044 (ES3) \\
-3        & 0.039 & 2.842 $\rightarrow$ 2.842 & 1,186,051 & \multirow{4}{*}{0.954} & \multirow{4}{*}{+0.00074 (ES4)} \\
-4        & 0.059 & 3.085 $\rightarrow$ 3.086 & 671,422 & & \\
-5        & 0.082 & 3.423 $\rightarrow$ 3.425 & 319,161 & & \\
-6        & 0.108 & 3.562 $\rightarrow$ 3.565 & 15,289 & & \\
-7        & 0.143 & 3.646 $\rightarrow$ 3.651 & 0 & --- & not written \\
-8        & 0.184 & --- & 0 & --- & failed \\
-9--12    & 0.196 & --- & 0 & --- & failed \\
-13--24   & 0.309 & --- & 0 & --- & failed \\
-25--48   & 1.451 & --- & 0 & --- & failed \\
+1        & 0.020 & unchanged & 1,715,267 & 0.962 & +0.00039 (ES2) \\
+2        & 0.028 & 2.560 / 2.560 & 1,918,477 & 0.960 & +0.00044 (ES3) \\
+3        & 0.039 & 2.842 / 2.842 & 1,186,051 & \multirow{4}{*}{0.954} & \multirow{4}{*}{+0.00074 (ES4)} \\
+4        & 0.059 & 3.085 / 3.086 & 671,422 & & \\
+5        & 0.082 & 3.423 / 3.425 & 319,161 & & \\
+6        & 0.108 & 3.562 / 3.565 & 15,289 & & \\
+7        & 0.143 & 3.646 / 3.651 & 0 & & not written \\
+8        & 0.184 & & 0 & & failed \\
+9--12    & 0.196 & & 0 & & failed \\
+13--24   & 0.309 & & 0 & & failed \\
+25--48   & 1.451 & & 0 & & failed \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Across the three submissions the edit changed 5,825,667 speeds by about 0.96 km/h on average (RMS 1.25 km/h,
-maximum 6.24 km/h) and added +0.00157 in public. It is a small gain from a simple, label-free statistic, and it is
-the only evaluation-month adaptation of speed in the selected files.
+Across the three submissions the edit changed 5,825,667 speed values by about 0.96 km/h on average (RMS 1.25 km/h,
+maximum 6.24 km/h) and raised the validation score by 0.00157 in total. It is a small gain from a simple, label-free
+statistic, and it is the only evaluation-month adaptation of speed in the final submissions.
 
 \subsection{Results and error analysis}\label{sec:state-error}
-\Cref{fig:state-regimes} compares the RS1 residual model with interpolation on February, held out from a fit on
-June--November. Speed RMSE falls from 2.75--2.98 to 1.46--1.66 km/h and per-lane flow RMSE from 44.5--47.6 to
-30.4--31.1 veh/h, giving a state piece of 0.940--0.945 against 0.899--0.907. The 50\,\% mask costs the model only
-0.005 in the piece relative to the 20\,\% mask. \Cref{fig:state-gaps} shows that the advantage holds at every gap
-length: the model roughly halves interpolation error from one-slot gaps (1.41 against 2.37 km/h) to gaps of 13--30
-slots (1.99 against 3.98 km/h).
+\Cref{tab:regimes} and \cref{fig:state-error} compare the RS1 residual model with interpolation on February, held out
+from a fit on June to November. Speed RMSE falls from 2.75--2.98 to 1.46--1.66 km/h and per-lane flow RMSE from
+44.5--47.6 to 30.4--31.1 veh/h, giving a state piece of 0.940--0.945 against 0.899--0.907. The 50\,\% mask costs the
+model only 0.005 in the piece relative to the 20\,\% mask. The advantage holds at every gap length: the model roughly
+halves interpolation error from one-slot gaps (1.41 against 2.37 km/h) to gaps of 13 to 30 slots (1.99 against
+3.98 km/h).
+
+\begin{table}[h]
+\centering\small
+\caption{February state error by masking regime (held out from a fit on June to November; training proxy).}\label{tab:regimes}
+\begin{tabular}{@{}l r r r r r r r@{}}
+\toprule
+ & & \multicolumn{2}{c}{Speed RMSE (km/h)} & \multicolumn{2}{c}{Flow RMSE (veh/h/lane)} & \multicolumn{2}{c}{State piece} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(l){7-8}
+Regime & Cells & Interp. & Model & Interp. & Model & Interp. & Model \\
+\midrule
+R1 (20\,\%) & 555,352   & 2.748 & 1.460 & 44.5 & 30.4 & 0.9066 & 0.9451 \\
+R2 (30\,\%) & 902,718   & 2.839 & 1.553 & 46.2 & 30.9 & 0.9032 & 0.9428 \\
+R3 (50\,\%) & 1,985,874 & 2.975 & 1.661 & 47.6 & 31.1 & 0.8993 & 0.9403 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_state_regimes.pdf}
-\caption{February state error by masking regime for the residual model and for same-day interpolation.}\label{fig:state-regimes}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_state_gaps.pdf}
-\caption{February speed error by gap length. The residual model's error grows from 1.41 to 1.99 km/h as gaps widen;
-interpolation's grows from 2.37 to 3.98 km/h.}\label{fig:state-gaps}
+\includegraphics[width=\linewidth]{figures/fig_state_error.pdf}
+\caption{February speed error of the residual model and of same-day interpolation (a) by masking regime and (b) by the
+distance to the farther temporal anchor, in five-minute slots. Cell counts by gap class are 804,794, 963,903,
+1,371,721, 214,200 and 34,936.}\label{fig:state-error}
 \end{figure}
 
 \paragraph{Where the error is} Error concentrates where a wave passes inside the gap. Among February cells with both
@@ -244,9 +257,9 @@ temporal anchors: on 735,668 cells where both adjacent links are observed, their
 model's 1.44, and switching to the neighbours only when the temporal anchors disagree by 20 km/h still scores
 1.60 km/h. The model already combines both sources better than any fixed rule we tried.
 
-\paragraph{What the public board says} Replacing the first residual model by plain interpolation (L0 against U2)
-cost 0.00867 in public, and the RS1 model added +0.00974 over the first model (RC2 against RC1). Month-blocked
-cross-validation on training months had predicted about +0.021 for the first model over interpolation in the same
-state-and-physics block, $0.35\,\Sstate+0.15\,\Sphys$; the public board measured +0.0087. The model transfers to a new month, but less than half
-of its cross-validated advantage survived, which is why every later state change was gated on held-out months
-and why we treat state proxies as optimistic by a factor of about two.
+\paragraph{Validation evidence} Replacing the first residual model by plain interpolation (L0 against U2) lowered
+the validation score by 0.00867, and the RS1 model added 0.00974 over the first model (RC2 against RC1).
+Month-blocked cross-validation on training months had predicted about 0.021 for the first model over interpolation in
+the same state-and-physics block, $0.35\,\Sstate+0.15\,\Sphys$; the validation month showed 0.0087. The model
+transfers to a new month, but less than half of its cross-validated advantage survived. For this reason every later
+state change was tested on held-out months, and we treat state proxies as optimistic by a factor of about two.

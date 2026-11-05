@@ -1,46 +1,43 @@
 % ============================================================== APPENDIX ==
 \needspace{20\baselineskip}
-\section{Complete submission history}\label{app:history}
+\section{Evaluated submissions}\label{app:history}
 
 \begin{table}[H]
 \centering\footnotesize
-\caption{All 31 Kaggle submissions of the team, in order. Public scores are Kaggle results; the two selected files
+\caption{All evaluated submissions in chronological order, with their validation scores. The two final submissions
 are in bold. Generated from \code{docs/data/submissions.csv}.}\label{tab:history}
 \setlength{\tabcolsep}{4.5pt}
 \input{generated/tab_submissions.tex}
 \end{table}
 
-\needspace{12\baselineskip}
+\clearpage
 \section{Glossary of identifiers}\label{app:glossary}
 
-{\small
-\begin{longtable}{@{}p{0.13\linewidth} p{0.83\linewidth}@{}}
+\begin{table}[H]
+\centering\small
+\caption{Identifiers used in this report.}\label{tab:glossary}
+\begin{tabularx}{\linewidth}{@{}p{0.14\linewidth} X@{}}
 \toprule
 ID & Meaning \\
 \midrule
-\endfirsthead
-\toprule
-ID & Meaning \\
-\midrule
-\endhead
-\bottomrule
-\endlastfoot
-BASE & The organizer's baselines for all four tasks, submitted as an anchor (0.55343). \\
+BASE & The organizer's baselines for all four tasks, evaluated as an anchor (0.55343). \\
 T4-v$n$ & Task 4 probes: only demand rows differ from BASE. v1 is the exact split-specific NNLS that every later file uses. \\
 V1 & First full file: residual GBDT state, LightGBM queues reading 13 slots including $T$. Superseded. \\
 P-$\ast$ & Probes that isolate one component: P-persq (persistence queues), P-noonset (onset zeroed), P-slotT (diagnostic, reads slot $T$). \\
-U1, U2, U3 & First files under the twelve-slot contract: legal onset classifier; plus forward-filled ongoing persistence; plus an onset frequency prior. \\
-J1 & U2 with the joint-mask onset analogue. Its onset and demand rows are retained in both selected files. \\
+U1, U2, U3 & First files under the twelve-slot contract: a twelve-slot onset classifier; adding forward-filled ongoing persistence; adding an onset frequency prior. \\
+J1 & U2 with the joint-mask onset analogue. Its onset and demand rows are retained in both final submissions. \\
 L0 & U2 with time-interpolated state; an ablation of the residual model. \\
 RS1 & Enhanced residual state model (92 features, density reconciliation), refit on all nine TRAIN months. \\
 RQ$n$, Q$n$ & Queue research arms. RQ2: trajectory-analogue decoder. Q19: local and distance-scaled ongoing features. Q46: first-crossing classifier. RQ48: quarter-weight decoder utility. RQ59: occupancy classifier. \\
-RC$n$, CS$n$ & 2 October candidates combining RS1 state with queue variants. \\
+RC$n$, CS$n$ & Candidates combining RS1 state with queue variants. \\
 S5, S10, S12 & Free-branch corrections: rank-8 covariance speed; rank-12 temporal factor flow; spatial-covariance conditional speed. \\
 FS1 & The widened, half-strength free-branch gate combining S10 and S12. \\
-CT$n$, CF$n$ & 3 October candidates. CT1: S5 + Q19. CT2: + S10/S12. CF1: + FS1 + Q46. CF2: + RQ48. CF3: + RQ59 (lost). \\
-TS3 / TF3 & Three-member fixed sample ensemble of the state model / the submission that carries it. Selected. \\
-EQ1 & Ongoing classifier refit on first crossings from all nine TRAIN months, 800 trees. \\
-ES1--ES5 & TF3 + EQ1 (ES1); + gap-1, gap-2 and gap 3--6 recentering (ES2--ES4, ES4 selected); + March-fit speed model (ES5, lost). \\
+CT$n$, CF$n$ & Later candidates. CT1: S5 and Q19. CT2: adds S10/S12. CF1: adds FS1 and Q46. CF2: adds RQ48. CF3: adds RQ59 (not retained). \\
+TS3, TF3 & The three-member fixed sample ensemble of the state model, and the submission that carries it (final). \\
+EQ1 & Ongoing classifier refitted on first crossings from all nine training months, 800 trees. \\
+ES1 to ES5 & TF3 with EQ1 (ES1); with gap-1, gap-2 and gap 3--6 recentering (ES2 to ES4, ES4 final); with a March-fit speed model (ES5, not retained). \\
 Shell & Target cells whose farther temporal anchor lies a given number of five-minute slots away. \\
-Proxy & Any locally computed score; never a leaderboard number. \\
-\end{longtable}}
+Proxy & Any locally computed score; never a validation score. \\
+\bottomrule
+\end{tabularx}
+\end{table}

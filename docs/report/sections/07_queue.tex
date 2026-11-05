@@ -10,11 +10,12 @@ six horizons. The decision that maximizes the expected score is
   \label{eq:bayes}
 \end{equation}
 which has no closed form because IoU is a ratio over the whole field \cite{nowozin2014}. We approximate the
-expectation in two ways. An \emph{empirical} estimate averages the IoU of $a$ against the complete outcomes $y_j$ of
-analogous training windows \cite{lorenz1969}. A \emph{model} estimate uses per-cell probabilities $p_i$ and the ratio of
-expected intersection to expected union,
+expectation in two ways, writing $J$ for an estimate of the Jaccard index (IoU). An \emph{empirical} estimate
+$J_{\mathrm{emp}}(a)$ averages the IoU of $a$ against the complete outcomes $y_j$ of analogous training windows
+\cite{lorenz1969}. A \emph{model} estimate uses per-cell probabilities $p_i$ and the ratio of expected intersection to
+expected union,
 \begin{equation}
-  \widehat{\IoU}_p(a) = \frac{\sum_i a_i p_i}{\sum_i a_i + \sum_i p_i - \sum_i a_i p_i}.
+  J_p(a) = \frac{\sum_i a_i p_i}{\sum_i a_i + \sum_i p_i - \sum_i a_i p_i}.
   \label{eq:modeliou}
 \end{equation}
 This ratio of expectations is not the exact expected IoU, but it rewards the right trade-off between size and
@@ -38,10 +39,10 @@ Two properties of the selector (\cref{sec:design}) decide the shape of a good fo
 The organizer's persistence baseline repeats the queue state of slot $T{-}5$ using eligible cells only. Between 23 and
 24\,\% of links have a missing or ineligible $T{-}5$ reading in every split, and persistence then predicts ``not
 queued'' there. Forward-filling the last \emph{released} value of each link over the twelve slots, ineligible readings
-included, keeps those links. On the public board this raised ongoing IoU from about 0.603 to 0.738 (U2 against U1,
-an ongoing-only change of +0.02021 in total). A diagnostic that set ongoing queues from the state at slot $T$
-(P-slotT) reached only about 0.729. On the training windows slot $T$ adds $+0.003\pm0.002$ latent IoU over the legal
-forward-fill: what mattered was not the extra slot but not throwing away the sensors that were already there.
+included, keeps those links. On the validation month this raised ongoing IoU from about 0.603 to 0.738 (U2 against
+U1, an ongoing-only change of 0.02021 in the composite score). A diagnostic that set ongoing queues from the state at
+slot $T$ (P-slotT) reached only about 0.729. On the training windows slot $T$ adds $0.003\pm0.002$ latent IoU over
+the forward-fill. What mattered was not the extra slot but retaining the sensors that were already reporting.
 
 \subsection{Onset: a joint-mask analogue}\label{sec:onset}
 Per-link classifiers decide each link independently and so cannot represent the joint size and shape of an onset.
@@ -59,9 +60,10 @@ The J1 rule instead chooses a complete mask from the outcomes of similar trainin
   \item \textbf{Bayes action.} The action with the highest mean IoU against the ten neighbour outcomes on their known
         cells, placed at $T{+}30$ only; horizons 1--5 are empty.
 \end{enumerate}
-In public, the legal LightGBM onset classifier scored about 0.626 IoU, a frequency prior 0.450 and J1 0.750
-(\cref{tab:components}). J1 has been the onset of every candidate since, including both selected files. Its 0.75 is
-close to what the training analysis says twelve slots allow (0.62 with unknown extent, 0.905 with the true extent).
+On the validation month the twelve-slot LightGBM onset classifier scored about 0.626 IoU, a frequency prior 0.450 and
+J1 0.750 (\cref{tab:components}). J1 has supplied the onset forecasts of every later candidate, including both final
+submissions. Its 0.75 is close to what the training analysis suggests twelve slots allow (0.62 with unknown extent,
+0.905 with the true extent).
 
 \subsection{Ongoing queues: classifier, analogue library and decoder}\label{sec:decoder}
 \paragraph{Training population} A training origin is \emph{difficult} when its observed six-step future has queued
@@ -113,44 +115,44 @@ the expected-count decoding of $p$; $p\ge0.4$ and $p\ge0.5$; the 20 donor future
 thresholded at 0.25, 0.40, 0.55 and 0.70; the union and intersection of the analogue choice with the decoded $p$; and
 the expected-count decoding of $\alpha\,\text{marginal}+(1-\alpha)\,p$ for $\alpha\in\{0.25,0.5,0.75\}$.
 
-\paragraph{Decoder (RQ48)} With $\widehat{\IoU}_{\mathrm{emp}}(a)$ the mean IoU of $a$ against the donor futures on their
+\paragraph{Decoder (RQ48)} With $J_{\mathrm{emp}}(a)$ the mean IoU of $a$ against the donor futures on their
 known cells, the deployed choice is
 \begin{equation}
-  \hat a = \arg\max_{a\in\mathcal A}\ \Big[\,0.25\,\widehat{\IoU}_{\mathrm{emp}}(a) + 0.75\,\widehat{\IoU}_p(a)\,\Big].
+  \hat a = \arg\max_{a\in\mathcal A}\ \Big[\,0.25\,J_{\mathrm{emp}}(a) + 0.75\,J_p(a)\,\Big].
   \label{eq:rq48}
 \end{equation}
 The earlier rule used equal weights. Four weightings were registered before development; the quarter weight had
 the largest minimum gain across the March and April development samples, passed its single confirmation
-(+0.0335 and +0.0300 on even dates, date-clustered 95\,\% intervals [0.013, 0.054] and [0.012, 0.051]), and measured
-+0.00469 in public, which corresponds to +0.031 ongoing IoU.
+(+0.0335 and +0.0300 on even dates, date-clustered 95\,\% intervals [0.013, 0.054] and [0.012, 0.051]), and raised
+the validation score by 0.00469, which corresponds to 0.031 ongoing IoU.
 
 \subsection{Results and the selection gap}\label{sec:queue-results}
-\Cref{tab:components} gives the public evidence. Ongoing IoU rose from about 0.603 (organizer persistence) to 0.738
-(forward-fill) and 0.766 (first analogue decoder); two later steps changed the state as well and cannot be split, then
-RQ48 added +0.031 and EQ1 +0.003. If the two state corrections in those mixed steps contributed between nothing and
-their full held-out proxy value, ES4's ongoing IoU is between 0.827 and 0.832 in public. Onset stayed at 0.750.
+\Cref{tab:components} gives the validation evidence. Ongoing IoU rose from about 0.603 (organizer persistence) to
+0.738 (forward-fill) and 0.766 (first analogue decoder). Two later steps also changed the state and cannot be
+separated; after them RQ48 added 0.031 and EQ1 0.003. If the two state corrections in those mixed steps contributed
+between nothing and their full held-out proxy value, ES4's ongoing IoU on the validation month lies between 0.827 and
+0.832. Onset IoU remained at 0.750.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_queue_ceiling.pdf}
-\caption{The selection gap. ``Best action'' is the highest-scoring mask already in the candidate set, identified with
-the label after the choice; it is a diagnostic, not a forecast. Published windows use latent labels; March windows
-use visible observations. The full decoder was not scored on the June instrument.}\label{fig:queue-ceiling}
+\includegraphics[width=\linewidth]{figures/fig_queue_selection.pdf}
+\caption{Mean IoU of persistence, the analogue's choice, the deployed decoder and the best mask already present in the
+candidate set (identified with the label after the choice; a diagnostic, not a forecast). Published training windows
+use latent labels and visible March windows use observations. The deployed decoder was not evaluated on the published
+windows.}\label{fig:queue-ceiling}
 \end{figure}
 
-\Cref{fig:queue-ceiling} shows where the remaining queue error lives. On the 40 published ongoing windows, the
+\Cref{fig:queue-ceiling} shows where the remaining queue error lies. On the 40 published ongoing windows, the
 analogue's choice scores 0.836 while the best mask in its own candidate set scores 0.934. On 146 visible March
 windows the deployed decoder scores 0.813 against a best-in-set 0.875, and the analogue's choice alone ties
 persistence (0.718). On 160 hard November windows the best whole-window action scores 0.946 and the best per-link
-combination 0.967, against 0.807 for the deployed whole-window rule. The candidates are good enough; choosing among
-them is not. None of the frozen selection rules we tried cleared its pre-set gain on held-out windows (0.02--0.03
-IoU): a ridge reranker (+0.007), an expected-overlap-minus-disagreement ranker (+0.009), a cell majority of the 20
-donors (+0.004), a neighbour-bit classifier ($-0.010$), per-link nearest-neighbour copies ($-0.022$), odd-date panel
-weights and a March-fit reranker (\cref{sec:negative}).
+combination 0.967, against 0.807 for the deployed whole-window rule. The candidate set is therefore adequate; the
+selection within it is not. None of the frozen selection rules we tried reached its pre-set gain of 0.02 to 0.03 IoU on
+held-out windows: a ridge reranker (+0.007), an expected-overlap-minus-disagreement ranker (+0.009), a cell majority
+of the 20 donors (+0.004), a neighbour-bit classifier ($-0.010$), per-link nearest-neighbour copies ($-0.022$),
+odd-date panel weights and a March-fit reranker (\cref{sec:negative}).
 
-\begin{keybox}[Insight]
-Queue forecasting here is a decision problem over complete masks. The two largest gains came from keeping
-information (forward-filling dropped sensors) and from respecting the joint structure of the outcome (choosing whole
-onset masks by expected IoU). Better per-cell probabilities moved the score less than the choice among whole masks,
-and that choice, not the candidate set, is where the remaining error sits.
-\end{keybox}
+In summary, queue forecasting in this benchmark is a decision problem over complete masks. The two largest gains came
+from retaining information (forward-filling dropped sensors) and from respecting the joint structure of the outcome
+(choosing whole onset masks by expected IoU). Better per-cell probabilities moved the score less than the choice among
+whole masks, and that choice, rather than the candidate set, is where the remaining error lies.

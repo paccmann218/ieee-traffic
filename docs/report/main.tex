@@ -1,9 +1,9 @@
 % TrafficFlowBench final report, team Powerbuff Girls.
-% Build: latexmk -pdf main.tex   (or: pdflatex, bibtex, pdflatex, pdflatex)
-% Figures: python docs/scripts/make_figures.py  (regenerates figures/ and generated/)
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% Figures and generated tables: python docs/scripts/make_figures.py
 \documentclass[11pt,a4paper]{article}
 
-% ------------------------------------------------------------------ fonts --
+% Fonts
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{libertinus}
@@ -11,8 +11,8 @@
 \usepackage[scaled=0.84]{beramono}
 \usepackage[final]{microtype}
 
-% ------------------------------------------------------------------- page --
-\usepackage[a4paper,left=24mm,right=24mm,top=26mm,bottom=26mm,headheight=22pt,headsep=7mm,footskip=12mm]{geometry}
+% Page layout
+\usepackage[a4paper,left=25mm,right=25mm,top=27mm,bottom=27mm,headheight=14pt,headsep=8mm,footskip=11mm]{geometry}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage{titletoc}
@@ -20,11 +20,9 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{multirow}
-\usepackage{makecell}
 \usepackage{array}
 \usepackage{longtable}
 \usepackage[section,above]{placeins}
@@ -41,80 +39,47 @@
 \usepackage{etoolbox}
 \pretocmd{\section}{\needspace{9\baselineskip}}{}{}
 \pretocmd{\subsection}{\needspace{5\baselineskip}}{}{}
-\usepackage{siunitx}
 \usepackage{amsmath,amssymb,mathtools,bm}
-\usepackage[most]{tcolorbox}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric,decorations.pathreplacing}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathreplacing,patterns}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 
-% ----------------------------------------------------------------- colour --
-\definecolor{ink}{HTML}{0B0B0B}
-\definecolor{ink2}{HTML}{52514E}
-\definecolor{muted}{HTML}{898781}
-\definecolor{rulec}{HTML}{C3C2B7}
-\definecolor{gridc}{HTML}{E1E0D9}
-\definecolor{accent}{HTML}{2A78D6}
-\definecolor{deep}{HTML}{163A6B}
-\definecolor{orange}{HTML}{EB6834}
-\definecolor{aqua}{HTML}{1BAF7A}
-\definecolor{redc}{HTML}{D03B3B}
-\definecolor{panel}{HTML}{F3F6FB}
-\definecolor{panel2}{HTML}{F7F6F2}
-\definecolor{statec}{HTML}{2A78D6}
-\definecolor{queuec}{HTML}{EB6834}
-\definecolor{odmec}{HTML}{1BAF7A}
-\definecolor{physc}{HTML}{6250D6}
-
-\hypersetup{colorlinks=true,linkcolor=deep,citecolor=deep,urlcolor=accent,
-  pdftitle={TrafficFlowBench: Final Report of Team Powerbuff Girls},
-  pdfauthor={Naomi Pereira and Harshendra M (team Powerbuff Girls, Ramaiah Institute of Technology, Bengaluru)},
-  pdfsubject={2026 IEEE Big Data Cup - TrafficFlowBench: state reconstruction, queue forecasting, physics consistency and OD estimation},
+\hypersetup{
+  pdftitle={Residual Reconstruction, Analogue Forecasting and Exact Demand Estimation for Freeway Traffic},
+  pdfauthor={Naomi Pereira and Harshendra M},
+  pdfsubject={TrafficFlowBench, 2026 IEEE Big Data Cup: final report of team Powerbuff Girls},
   pdfkeywords={traffic state estimation, LWR, fundamental diagram, queue forecasting, analogue forecasting, gradient boosting, ODME, NNLS, reproducibility}}
 
-% ------------------------------------------------------------- typography --
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{5.2pt plus 1pt minus 1pt}
-\linespread{1.04}
-\sisetup{group-separator={,},group-minimum-digits=4,detect-all}
-\newcommand{\sffamilyb}{\sffamily\bfseries}
-\captionsetup{font={small},labelfont={sf,bf,color=deep},textfont={color=ink2},labelsep=period,skip=5pt,justification=justified,singlelinecheck=false}
+% Typography
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{1pt plus 1pt}
+\linespread{1.05}
+\captionsetup{font=small,labelfont=bf,labelsep=period,skip=6pt,justification=justified,singlelinecheck=false}
 \captionsetup[table]{position=top,skip=4pt}
-\setlist{itemsep=2pt,topsep=3pt,parsep=0pt,leftmargin=1.3em}
-\renewcommand{\arraystretch}{1.12}
+\setlist{itemsep=1.5pt,topsep=4pt,parsep=0pt,leftmargin=1.5em}
+\renewcommand{\arraystretch}{1.1}
 \setlength{\tabcolsep}{5pt}
 
-\titleformat{\section}{\sffamily\bfseries\Large\color{deep}}{\color{accent}\thesection}{0.7em}{}[{\color{rulec}\vspace{2pt}\titlerule[0.5pt]}]
-\titleformat{\subsection}{\sffamily\bfseries\large\color{deep}}{\color{accent}\thesubsection}{0.6em}{}
-\titleformat{\subsubsection}{\sffamily\bfseries\normalsize\color{ink}}{\thesubsubsection}{0.55em}{}
-\titleformat{\paragraph}[runin]{\sffamily\bfseries\color{deep}}{}{0pt}{}[.]
-\titlespacing*{\section}{0pt}{16pt plus 3pt}{8pt}
-\titlespacing*{\subsection}{0pt}{11pt plus 2pt}{4pt}
-\titlespacing*{\subsubsection}{0pt}{8pt plus 2pt}{3pt}
-\titlespacing*{\paragraph}{0pt}{5pt}{0.6em}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}[.]
+\titlespacing*{\section}{0pt}{18pt plus 3pt minus 2pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt plus 2pt minus 1pt}{5pt}
+\titlespacing*{\subsubsection}{0pt}{9pt plus 2pt}{4pt}
+\titlespacing*{\paragraph}{0pt}{6pt plus 1pt}{0.6em}
 
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\headrule}{\hbox to\headwidth{\color{rulec}\leaders\hrule height \headrulewidth\hfill}}
-\fancyhead[L]{\sffamily\footnotesize\color{muted}TrafficFlowBench \textperiodcentered{} Final report}
-\fancyhead[R]{\sffamily\footnotesize\color{muted}Powerbuff Girls \textperiodcentered{} 2026 IEEE Big Data Cup}
-\fancyfoot[C]{\sffamily\footnotesize\color{muted}\thepage}
-\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\sffamily\footnotesize\color{muted}\thepage}}
+\fancyhead[L]{\footnotesize\scshape TrafficFlowBench: final report}
+\fancyhead[R]{\footnotesize\thepage}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize\thepage}}
 
-% --------------------------------------------------------------- tcolorbox --
-\tcbset{
-  base/.style={enhanced,boxrule=0pt,arc=2pt,left=9pt,right=9pt,top=7pt,bottom=7pt,fontupper=\small},
-}
-\newtcolorbox{keybox}[1][]{base,colback=panel,borderline west={2.4pt}{0pt}{accent},
-  title={\sffamily\bfseries #1},coltitle=deep,colbacktitle=panel,attach title to upper,after title={\par\smallskip}}
-\newtcolorbox{notebox}[1][]{base,colback=panel2,borderline west={2.4pt}{0pt}{orange},
-  title={\sffamily\bfseries #1},coltitle=ink,colbacktitle=panel2,attach title to upper,after title={\par\smallskip}}
-\newtcolorbox{absbox}{base,colback=panel,left=14pt,right=14pt,top=10pt,bottom=10pt,fontupper=\normalsize}
-% ----------------------------------------------------------------- macros --
+% Notation
 \newcommand{\Sstate}{S_{\mathrm{state}}}
 \newcommand{\Squeue}{S_{\mathrm{queue}}}
 \newcommand{\Sphys}{S_{\mathrm{physics}}}
@@ -125,19 +90,10 @@
 \newcommand{\IoU}{\mathrm{IoU}}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\sha}[1]{{\ttfamily\scriptsize #1}}
-\newcommand{\proxy}{\textsuperscript{\textsf{\scriptsize P}}}
-\newcommand{\tasktag}[2]{\tikz[baseline=(t.base)]\node[inner xsep=3pt,inner ysep=1.2pt,rounded corners=1.5pt,fill=#1!14,text=#1!70!black,font=\sffamily\scriptsize\bfseries](t){#2};}
-\newcommand{\Tstate}{\tasktag{statec}{STATE}}
-\newcommand{\Tqueue}{\tasktag{queuec}{QUEUE}}
-\newcommand{\Todme}{\tasktag{odmec}{ODME}}
-\newcommand{\Tphys}{\tasktag{physc}{PHYSICS}}
+\newcommand{\proxy}{\textsuperscript{\dag}}
 
 % Author block: edit here to change names or affiliations everywhere.
 \newcommand{\teamname}{Powerbuff Girls}
-\newcommand{\authorlist}{Naomi Pereira \quad\textperiodcentered\quad Harshendra M}
-\newcommand{\teamstatus}{Fourth-year undergraduate students, Department of Information Science and Engineering}
-\newcommand{\teamaffiliation}{Ramaiah Institute of Technology, Bengaluru, India}
-\newcommand{\teammembers}{Kaggle accounts \texttt{naomiandreapereira} and \texttt{hersheyz}}
 \newcommand{\repourl}{https://github.com/NaomiiAP/ieee-traffic}
 
 \begin{document}

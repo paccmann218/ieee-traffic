@@ -1,0 +1,23 @@
+\begin{tabular}{@{}r l l r r@{}}
+\toprule
+Step & Change & Rows changed & $\Delta$ score & Cumulative \\
+\midrule
+0 & Organizer baselines (anchor) & all & & 0.55343 \\\\
+1 & Exact split-specific NNLS demand & Demand & +0.03158 & 0.58501 \\
+2 & Residual GBDT state reconstruction & State & +0.12691 & 0.71192 \\
+3 & Legal onset classifier (U1) & Onset & +0.09387 & 0.80579 \\
+4 & Forward-filled ongoing persistence (U2) & Ongoing & +0.02021 & 0.82600 \\
+5 & Joint-mask onset analogue (J1) & Onset & +0.01861 & 0.84461 \\
+6 & RS1 state model (RC2 $-$ RC1) & State & +0.00974 & 0.85435 \\
+7 & RQ2 ongoing analogue decoder (CS1, by additivity) & Ongoing & +0.00414 & 0.85849 \\
+8 & S5 speed correction and Q19 features (CT1) & State, ongoing & +0.00039 & 0.85888 \\
+9 & S10 factor flow and S12 covariance speed (CT2) & State & +0.00151 & 0.86039 \\
+10 & FS1 gate and Q46 first-crossing classifier (CF1) & State, ongoing & +0.00449 & 0.86488 \\
+11 & RQ48 quarter-prior decoder (CF2) & Ongoing & +0.00469 & 0.86957 \\
+12 & Three-member sample ensemble (TF3) & State & +0.00034 & 0.86991 \\
+13 & All-month ongoing classifier (ES1) & Ongoing & +0.00039 & 0.87030 \\
+14 & Gap-1 speed recentering (ES2) & State & +0.00039 & 0.87069 \\
+15 & Gap-2 speed recentering (ES3) & State & +0.00044 & 0.87113 \\
+16 & Gap 3--6 speed recentering (ES4) & State & +0.00074 & 0.87187 \\
+\bottomrule
+\end{tabular}

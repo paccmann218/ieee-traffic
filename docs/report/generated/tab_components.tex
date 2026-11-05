@@ -2,10 +2,10 @@
 \toprule
 Task & Quantity & Value & Identified from \\
 \midrule
-Demand & $S_{\mathrm{ODME}}$, organizer baseline (TRAIN counts) & 0.8359 & documented \\
- & $S_{\mathrm{ODME}}$, exact NNLS on the split's own counts & 0.9938 & T4-v1 $-$ BASE \\
+Demand & $\Sodme$, organizer solve on TRAIN counts & 0.8359 & documented \\
+ & $\Sodme$, exact NNLS on the split's own data & 0.9938 & T4-v1 $-$ BASE \\
 \addlinespace[2pt]
-State & $B$, weekday--slot historical mean (baseline) & 0.2957 & documented \\
+State & $B$, weekday $\times$ slot historical mean & 0.2957 & documented \\
  & $B$, time interpolation & 0.4140 & L0 $-$ U2 \\
  & $B$, first residual GBDT (V1) & 0.4226 & P-persq \\
  & $B$, RS1 residual GBDT & 0.4324 & RC2 $-$ RC1 \\
@@ -13,13 +13,13 @@ State & $B$, weekday--slot historical mean (baseline) & 0.2957 & documented \\
 Onset & IoU, persistence (predicts nothing) & $\approx 0$ & by construction \\
  & IoU, first LightGBM, 13 slots incl.\ $T$ (V1) & 0.6393 & V1 $-$ P-noonset \\
  & IoU, legal 12-slot classifier (U1) & 0.6258 & U1 $-$ P-persq \\
- & IoU, train frequency prior (U3) & 0.4497 & U3 $-$ U2 \\
+ & IoU, training frequency prior (U3) & 0.4497 & U3 $-$ U2 \\
  & IoU, demand-history completion (CS3) & 0.7116 & CS3 $-$ CS2 \\
  & IoU, joint-mask analogue (J1, kept to ES4) & 0.7499 & J1 $-$ U2 \\
 \addlinespace[2pt]
-Ongoing & IoU, organizer persistence (eligible cells) & 0.6034 & documented \\
+Ongoing & IoU, organizer persistence & 0.6034 & documented \\
  & IoU, first LightGBM, 13 slots incl.\ $T$ (V1) & 0.5922 & P-noonset \\
- & IoU, same, trained on unfiltered windows & 0.6144 & V1-nh $-$ V1 \\
+ & IoU, same model, unfiltered training windows & 0.6144 & V1-nh $-$ V1 \\
  & IoU, state at slot $T$ (diagnostic only) & 0.7293 & P-slotT $-$ V1 \\
  & IoU, forward-fill of the last legal value (U2) & 0.7381 & U2 $-$ U1 \\
  & IoU, RQ2 analogue decoder (CS1) & 0.7657 & CS1 identity \\

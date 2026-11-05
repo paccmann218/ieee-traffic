@@ -22,20 +22,15 @@ non-regression check next to $\Sstate$, never as the objective.
 
 \subsection{Imposing physics lost every time}
 We tested the most natural ways to make the reconstruction obey the kinematic-wave model \cite{lighthill1955,richards1956,treiber2013}.
-Each was frozen on fitting months and scored once on held-out months (\cref{fig:physics,tab:physics}).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_physics_alternatives.pdf}
-\caption{Physics-based reconstructions against their controls. Left: one corridor, all October--February targets
-(2,583,593 cells), where same-day interpolation is the control. Right: February on all ten panels, where the
-deployed residual model is the control. Blue marks the control; TRAIN proxies.}\label{fig:physics}
-\end{figure}
+Each was frozen on fitting months and scored once on held-out months (\cref{tab:physics}). The first four rows use
+one corridor (D12\_I5\_N, all 2,583,593 October to February targets, with same-day interpolation as the control); the
+Newell rows use February on all ten panels, with the deployed residual model as the control.
 
 \begin{table}[h]
 \centering\small
-\caption{Physics-based reconstruction experiments. ``Piece'' is the per-cell state score of \cref{eq:state}. All
-numbers are held-out TRAIN proxies; none of these variants is in a selected file.}\label{tab:physics}
+\caption{Physics-based reconstruction experiments. ``Piece'' is the state score of \cref{eq:state} for the method and
+for its control. All values are held-out training proxies; none of these variants is used in a final
+submission.}\label{tab:physics}
 \begin{tabularx}{\linewidth}{@{}X r r X@{}}
 \toprule
 Method & Piece & Control & Outcome \\
@@ -44,13 +39,13 @@ Godunov LWR, 0.245 s step, 1,224 substeps per bin, released diagram, visible cel
 Corridor (spatial) interpolation of speed and flow & 0.8307 & 0.9045 & speed RMSE 6.59 vs 2.93 km/h \\
 Diagram inversion of spatially interpolated density & 0.7449 & 0.9045 & flow RMSE 104.3 vs 42.1 veh/h/lane \\
 Steady flux $\min(\text{sending},\text{receiving})$ on 1,159,377 ramp-free holes & 0.8510 & 0.9074 & congested speed RMSE 18.60 vs 7.98 km/h \\
-Time-interpolated speed with corridor-interpolated flow & $+$0.0037 & --- & lost on two corridors; local physics lower on seven \\
+Time-interpolated speed with corridor-interpolated flow & \multicolumn{2}{c}{$+$0.0037 (mean gain)} & lost on two corridors; local physics lower on seven \\
 Newell lower envelope of cumulative counts \cite{newell1993} & 0.4248 & 0.9456 & speed RMSE 79.03 vs 1.60 km/h \\
 Newell envelope only on congested cells & 0.8292 & 0.9456 & speed RMSE 7.36 km/h \\
 Flow nudge of at most 40 veh/h/lane toward the envelope & 0.9408 & 0.9456 & physics proxy 0.700 vs 0.743; projected $-$0.0081 total \\
-Congested-branch diagram flow from the interpolated speed & --- & --- & 101.4 vs 63.3 veh/h/lane on 131,696 cells, worse on all ten panels \\
-Occupancy density $k=285\cdot\mathrm{occ}$ inverted through the diagram & --- & --- & below interpolation on all ten panels \\
-Flow--ramp balance regression on consecutive visible pairs & --- & --- & held-out correlation 0.0009--0.0094 (bar 0.5) \\
+Congested-branch diagram flow from the interpolated speed & & & flow RMSE 101.4 vs 63.3 veh/h/lane on 131,696 cells, worse on all ten panels \\
+Occupancy density $k=285\cdot\mathrm{occ}$ inverted through the diagram & & & below interpolation on all ten panels \\
+Flow and ramp balance regression on consecutive visible pairs & & & held-out correlation 0.0009--0.0094 (threshold 0.5) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -66,9 +61,7 @@ Beyond that, incidents and capacity drops in the generator are unobserved forcin
 not the cell-boundary flux of the conservation check; and the conservation signal itself is small (about 0.75\,\% of
 the vehicles on a link) relative to the measurement noise.
 
-\begin{keybox}[Insight]
-In this benchmark the physics weight is best served by an accurate state, not by a physical model of the state.
-The diagram term is satisfied by any accurate field, and the conservation term moved together with state accuracy in
-every held-out test (for example, TS3 raised the local physics proxy by +0.0015 to +0.0018 while raising $\Sstate$).
-Imposing the kinematic-wave model never beat temporal evidence on held-out months.
-\end{keybox}
+In summary, the physics weight of this benchmark is best served by an accurate state rather than by a physical model
+of the state. The diagram term is satisfied by any accurate field, and the conservation term moved together with state
+accuracy in every held-out test; TS3, for example, raised the local physics proxy by 0.0015 to 0.0018 while raising
+$\Sstate$. Imposing the kinematic-wave model never outperformed temporal evidence on held-out months.

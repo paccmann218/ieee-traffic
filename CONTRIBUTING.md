@@ -47,7 +47,7 @@ This guide explains what can change, what must not, and the evidence we ask for.
    in `reproduce.py`. New results go in new files and new directories.
 2. **Never commit competition data or credentials.** The release is governed by the competition rules and is not
    redistributed. Kaggle tokens, cloud keys and `.pem` files must never enter the repository (see `.gitignore`).
-   Small derived summaries without raw records, such as the anonymized leaderboard scores in `docs/data/`, are fine.
+   Small derived summaries without raw records, such as the submission record in `docs/data/`, are fine.
 3. **Respect the information boundaries** (README, *Rules compliance*):
    - Task 1 may use the whole masked layer of its own split. The target channels are absent and must stay absent.
    - Task 2 forecasts in this repository use **exactly** the twelve slots $T-60 \dots T-5$ of their own window, static

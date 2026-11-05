@@ -119,7 +119,7 @@ task's score depends only on its own rows.
         congested windows by construction.
   \item \textbf{Queue scores are noisy.} The organizers report a per-window IoU standard deviation of 0.3752 on
         the persistence baseline; with five windows per condition and panel this is about 0.0126 of $\Stotal$ from
-        window sampling alone. Public and private queue scores can differ by that much with no change in skill.
+        window sampling alone. Validation and private queue scores can differ by that much with no change in skill.
   \item \textbf{Physics cannot be scored locally.} The conservation check needs the organizer's boundary flows,
         which are withheld. Estimating them from the submitted flows swamps the signal: the conservation signal is
         about 0.75\,\% of the vehicles on a link and that estimate is off by about 0.22\,\%, so a perfect answer on
@@ -128,8 +128,9 @@ task's score depends only on its own rows.
 
 \begin{table}[h]
 \centering\small
-\caption{Organizer reference scores on the validation split (from the public repository's baseline table). These
-values anchor the additive decomposition of \cref{sec:leaderboard}. Our first anchor submission scored 0.55343.}\label{tab:baselines}
+\caption{Organizer reference scores on the validation split, from the baseline table of the benchmark repository.
+These values anchor the additive decomposition of \cref{sec:leaderboard}; our submission of the same baselines
+scored 0.55343.}\label{tab:baselines}
 \begin{tabular}{@{}l l r r@{}}
 \toprule
 Component & Naive baseline & Baseline score & Perfect answer \\

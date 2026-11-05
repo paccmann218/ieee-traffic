@@ -54,14 +54,11 @@ def check() -> int:
             continue
         found = sha256(path)
         ok = found == item["sha256"]
-        print(
-            f"{name.upper()}  ref {item['kaggle_ref']}  public {item['public_score']}  "
-            f"sha256 {found}  {'OK' if ok else 'MISMATCH'}"
-        )
+        print(f"{name.upper():<9} sha256 {found}  {'OK' if ok else 'MISMATCH'}")
         failed = failed or not ok
     if BUNDLE.is_file():
         found = sha256(BUNDLE)
-        print(f"TF3-CODE  sha256 {found}  {'OK' if found == BUNDLE_SHA else 'MISMATCH'}")
+        print(f"{'TF3-CODE':<9} sha256 {found}  {'OK' if found == BUNDLE_SHA else 'MISMATCH'}")
         failed = failed or found != BUNDLE_SHA
     else:
         print(f"MISSING tf3 code bundle: {BUNDLE}")

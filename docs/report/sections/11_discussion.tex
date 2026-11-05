@@ -26,7 +26,8 @@ $B$ is bounded rather than identified after CT1 and CF1; the ongoing value inher
 
 \begin{table}[h]
 \centering\small
-\caption{Error budget of ES4 in public-score units. ``Room'' is the ceiling minus our contribution.}\label{tab:budget}
+\caption{Error budget of ES4 on the validation month, in units of the composite score. ``Room'' is the ceiling minus
+our contribution; the value of $B$ is bounded rather than identified.}\label{tab:budget}
 \begin{tabular}{@{}l r r r r@{}}
 \toprule
 Block & Component value & Contribution & Ceiling & Room \\
@@ -34,22 +35,22 @@ Block & Component value & Contribution & Ceiling & Room \\
 Demand, $0.20\,\Sodme$ & 0.9938 & 0.1988 & 0.2000 & 0.0012 \\
 Onset, $0.15\,\IoU$ & 0.750 & 0.1125 & 0.1500 & 0.0375 \\
 Ongoing, $0.15\,\IoU$ & 0.827--0.832 & 0.124--0.125 & 0.1500 & 0.025--0.026 \\
-State and physics, $B$ & --- & 0.4358--0.4366 & 0.4945 & 0.058 \\
+State and physics, $B$ & & 0.4358--0.4366 & 0.4945 & 0.058 \\
 \midrule
 Total & & 0.87187 & 0.9945 & 0.1226 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The arithmetic constrains how anyone can be above us. With our state and demand blocks, a perfect queue forecast
-($\Squeue=1$) would score at most about 0.935, and matching the public leader's 0.93124 would need $\Squeue\approx0.99$.
-Teams far above us must therefore be ahead in the state-and-physics block as well, most plausibly in conservation,
-where our block has 0.058 of room and our local instruments are weakest.
+The budget also bounds what further queue work can achieve. With our state and demand blocks unchanged, a perfect
+queue forecast ($\Squeue=1$) would reach a composite score of about 0.935. Larger improvements therefore require a
+better state-and-physics block, most plausibly in conservation, where the block has 0.058 of room and our local
+instruments are weakest.
 
 \subsection{Limitations}
 \begin{itemize}
-  \item There is no private score for either file, and the public difference between them (0.00196) is far below the
-        queue-sampling standard deviation.
+  \item No private score was available for either file at the time of writing, and the validation difference between
+        them (0.00196) is far below the queue-sampling standard deviation.
   \item Local proxies were reused across many studies; March and April visible events in particular were examined
         repeatedly, and their confidence intervals do not correct for that reuse.
   \item The three ensemble members share features and overlapping samples. Averaging reduces sampling variance, not
@@ -60,7 +61,7 @@ where our block has 0.058 of room and our local instruments are weakest.
   \item Our Task 2 contract is stricter than the rules. It excludes slot $T$ and same-day data before $T{-}60$, which the
         rules allow, and so leaves the queue-age signal unused.
   \item The local physics proxy uses observed accumulation in place of the withheld boundary flux and is not the
-        leaderboard physics score.
+        official physics score.
   \item ES4 regenerates from the release only up to its parent: the all-month classifier weights behind ES1 are not in
         this repository (\cref{sec:repro}).
 \end{itemize}

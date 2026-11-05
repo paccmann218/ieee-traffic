@@ -4,9 +4,8 @@
 \subsection{Environment and hardware}
 All production runs used CPU only on one AWS EC2 \code{r7i.2xlarge} instance (8 vCPU, 64 GiB RAM, Ubuntu with glibc
 2.39) and Python 3.12.3 with the pinned packages in \cref{tab:env}. No GPU is needed. The clean regeneration of TF3
-on 4 October 2026 ran from 12:15:17 to 13:48:28 UTC (1 h 33 min) with six threads, rebuilding every cache from the
-raw release. The release and the regenerated caches need substantial free disk; the reference instance had about 70 GiB
-free.
+took 1 h 33 min with six threads, including rebuilding every cache from the raw release. The release and the
+regenerated caches need substantial free disk; the reference instance had about 70 GiB free.
 
 \begin{table}[h]
 \centering\small
@@ -26,16 +25,17 @@ scikit-learn & 1.9.1 & BSD-3-Clause \\
 \end{table}
 
 \subsection{Commands}
-The repository has one entry point. The competition release is not redistributed; \code{--release-root} is the
+The repository has one entry point. The competition release is not redistributed; \code{-{}-release-root} is the
 directory that contains \code{submission\_key.csv}, \code{corridors/} and \code{task2/}.
-\begin{tcolorbox}[enhanced,boxrule=0pt,arc=2pt,colback=panel2,left=8pt,right=8pt,top=4pt,bottom=4pt,
-  borderline west={2.4pt}{0pt}{deep}]
+
+\smallskip
+\noindent\begin{minipage}{\linewidth}
 \small
 \begin{verbatim}
-# 1. verify the selected archives and the TF3 code bundle (standard library only)
+# 1. verify the final archives and the TF3 code bundle (standard library only)
 python reproduce.py
 
-# 2. regenerate TF3 from the raw release and the saved weights (no Kaggle call)
+# 2. regenerate TF3 from the raw release and the saved weights
 python -m pip install -r requirements.txt
 python reproduce.py --submission tf3 --release-root /path/to/release \
                     --out /path/to/new_tf3 --threads 6
@@ -44,7 +44,7 @@ python reproduce.py --submission tf3 --release-root /path/to/release \
 python reproduce.py --submission es4 --release-root /path/to/release \
                     --parent /path/to/submission_ES3.zip --out /path/to/new_es4
 \end{verbatim}
-\end{tcolorbox}
+\end{minipage}
 
 \subsection{What has been verified}
 \begin{itemize}
@@ -52,11 +52,11 @@ python reproduce.py --submission es4 --release-root /path/to/release \
         and the saved TRAIN weights, then compares all 6,980,503 rows with the submitted file. On the clean run every queue
         label matched exactly and the largest continuous difference was $1.82\times10^{-12}$. This verifies saved-weight
         inference; the refit procedure, seeds and inventories are recorded, but an independent retraining was not run.
-  \item \textbf{ES4.} The uploaded archive is in the repository and its checksum is verified by \code{reproduce.py}. ES4
+  \item \textbf{ES4.} The final archive is in the repository and its checksum is verified by \code{reproduce.py}. ES4
         equals ES3 plus the gap 3--6 shell, which \code{code/recenter\_short\_gaps.py} regenerates from ES3. The
-        intermediate archives ES1--ES3 and the all-month ongoing classifier EQ1 are not in this repository, so ES4 is
+        intermediate archives ES1 to ES3 and the all-month ongoing classifier EQ1 are not in this repository, so ES4 is
         not regenerated end to end from the release by this repository alone. TF3, which is, scored 0.00196 (0.22\,\%)
-        below ES4 in public.
+        below ES4 on the validation month.
 \end{itemize}
 
 \subsection{Artefacts and checksums}
