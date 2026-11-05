@@ -1,0 +1,110 @@
+% ============================================================== PROTOCOL ==
+\section{Information boundaries and research protocol}\label{sec:protocol}
+
+\subsection{What each task may read}
+Tasks 1, 3 and 4 are offline: the rules allow any released observation of the evaluation split, at any time,
+including times after the target cell. Task 2 is online: a forecast for origin $T$ may use released data stamped at
+or before $T$. We adopted a stricter contract for Task 2 and kept it in every selected file
+(\cref{tab:infosets,fig:t2window}). A forecast reads \emph{exactly} the twelve released slots $T{-}60,\dots,T{-}5$
+of its own window, static network data, and models or analogue libraries fitted on the training split. It does not
+read slot $T$ (which the current rules allow), other days or windows of the evaluation month, or the offline state
+reconstruction. The organizer's own persistence baseline was rewritten to the same twelve slots during the
+competition.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=6.3mm,y=7mm,font=\sffamily\scriptsize]
+  % history slots
+  \foreach \i in {0,...,11}{
+    \fill[accent!78] (\i,0) rectangle ++(0.86,0.86);
+  }
+  \fill[gridc] (12,0) rectangle ++(0.86,0.86);
+  \foreach \i in {13,...,18}{
+    \fill[orange!80] (\i,0) rectangle ++(0.86,0.86);
+  }
+  \foreach \i in {19,...,22}{
+    \fill[gridc!70] (\i,0) rectangle ++(0.86,0.86);
+  }
+  \node[text=white] at (0.43,0.43) {\tiny $-60$};
+  \node[text=white] at (11.43,0.43) {\tiny $-5$};
+  \node at (12.43,0.43) {\tiny $T$};
+  \node[text=white] at (13.43,0.43) {\tiny $+5$};
+  \node[text=white] at (18.43,0.43) {\tiny $+30$};
+  \draw[decorate,decoration={brace,amplitude=4pt}] (0,1.05) -- (11.86,1.05) node[midway,above=4pt,align=center]
+     {\textbf{Read:} 12 released slots, $T{-}60 \dots T{-}5$\\speed, flow, occupancy, ramps, eligibility};
+  \draw[decorate,decoration={brace,amplitude=4pt}] (13,1.05) -- (18.86,1.05) node[midway,above=4pt,align=center]
+     {\textbf{Predict:} queue field\\$L\times 6$ binary cells};
+  \draw[muted,line width=0.4pt] (12.43,-0.12) -- (12.43,-0.42);
+  \node[below,align=center,inner sep=1pt] at (12.43,-0.42) {slot $T$: released,\\\emph{not read}};
+  \draw[decorate,decoration={brace,amplitude=4pt,mirror}] (19,-0.18) -- (22.86,-0.18) node[midway,below=4pt,align=center]
+     {blanked buffer;\\later data never read};
+  \node[below,align=center,inner sep=1pt] at (5.43,-0.3)
+     {\textbf{+} static network, TRAIN-fitted models,\\TRAIN analogue library};
+\end{tikzpicture}
+\caption{The Task 2 information contract used in every selected file. Each window reads only its own twelve legal
+history slots. Other evaluation days, other windows, slot $T$, ramp values after $T$ and the offline Task 1
+reconstruction are excluded.}\label{fig:t2window}
+\end{figure}
+
+\begin{table}[h]
+\centering\small
+\caption{Information sets. ``Allowed'' is the competition rule; ``used'' is what the selected files read.}\label{tab:infosets}
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+Task & Allowed by the rules & Used by TF3 and ES4 \\
+\midrule
+1 State & Any released observation of the split, any time; train in full & Masked layer of the same split (target channels absent by construction); TRAIN-fitted trees, profiles, factor and covariance models \\
+2 Queue & Released data stamped $\le T$, including earlier days of the split & Exactly $T{-}60\dots T{-}5$ of the window; static network; TRAIN-fitted classifier and TRAIN analogue library \\
+3 Physics & No rows; read from Task 1 & --- \\
+4 ODME & Split's released counts, prior and incidence & Same; each split solved on its own counts and prior, never TRAIN counts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+One early file (\code{P-slotT}, 30 September) set ongoing queues from the state at slot $T$. It was a diagnostic
+to measure what slot $T$ adds; it was never a candidate and is not part of either selected file. \Cref{sec:ongoing}
+shows that a legal forward-fill of the twelfth slot scores higher than that diagnostic on the public board.
+
+\subsection{A hierarchy of proxies}
+Hidden labels exist only on Kaggle, so every decision used one of four local instruments, each with a known weakness.
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Held-out training months.} Models are fitted on June--November and scored on December, January and
+        February with the official masks and the official scorers for Tasks 1 and 4. This is the cleanest instrument,
+        but training months share one generator draw: they are not new incident schedules.
+  \item \textbf{The 80 published training queue windows} (40 onset, 40 ongoing), all dated 1--10 June 2030, scored
+        with latent labels reconstructed from the unmasked layer. They are few and repeatedly inspected.
+  \item \textbf{Visible-cell pseudo-events in March and April.} Extra masks or pseudo-windows are drawn on cells the
+        release shows, with odd and even dates split into development and confirmation halves. The targets are noisy
+        observations, not organizer latent labels.
+  \item \textbf{A local conservation proxy} that replaces the withheld boundary flux by the observed accumulation
+        change. We verified that our implementation equals the official Task 3 scorer given the same flux file, but
+        the proxy sits near the exact-answer ceiling and is not the leaderboard physics score.
+\end{enumerate}
+
+\subsection{Pre-registered gates}
+From 3 October onward each candidate change was registered before its result was seen, with a fixed development
+rule, a single confirmation and no rescue. The state ensemble (TS3, \cref{sec:ensemble}) illustrates the template:
+\begin{itemize}
+  \item \emph{Development} on December and January with models fitted on June--November: the joint proxy
+        $0.35\,\Sstate + 0.15\,S_{\mathrm{phys}}^{\mathrm{proxy}}$ must rise by at least 0.0001, $\Sstate$ must not fall,
+        at least seven of ten panels must improve and no panel may lose more than 0.001.
+  \item \emph{One confirmation} on February with the same rule and at least eight improving panels. A failed arm is
+        closed; no member, weight or panel subset is re-selected afterwards.
+  \item \emph{Final refit} of the frozen rule on all nine training months, with unchanged seeds and settings.
+\end{itemize}
+Queue changes used the analogous structure on visible March/April events (odd dates for development, even dates
+for confirmation) and on the published June windows, with date-clustered bootstrap intervals.
+
+\subsection{Release engineering}
+Every candidate from RC1 (2 October) to TF3 (4 October) passed the checklist below before its single upload.
+The later ES files change one column of a frozen, hash-verified parent; each was checked by recomputing its
+SHA256 and by a row-level difference against that parent (for example, ES2 changes exactly 1,715,267 speeds and
+nothing else). Every file was uploaded once.
+\begin{enumerate}
+  \item An independent standard-library parser reads all 6,980,503 rows and checks keys, value domains, horizon
+        placement and that only the intended columns changed relative to the parent file.
+  \item A clean regeneration from the raw release and the saved weights, in a fresh pinned environment that rebuilds
+        every cache, must reproduce every queue label exactly and every continuous value to within $10^{-8}$.
+  \item The archive SHA256 is recorded and an exclusive attempt marker is created before the single upload call. An
+        ambiguous network outcome is never retried; scores are confirmed by a separate read-only listing.
+\end{enumerate}

@@ -1,0 +1,102 @@
+% =========================================================== LEADERBOARD ==
+\section{The leaderboard as a measurement instrument}\label{sec:leaderboard}
+
+\subsection{Exact additive identification}
+The three row blocks of a submission are disjoint and each task is scored only on its own rows. Writing
+$B=0.35\,\Sstate+0.15\,\Sphys$ for the block that depends on the state rows,
+\begin{equation}
+  \Stotal = B + 0.20\,\Sodme + 0.15\,\IoU_{\mathrm{onset}} + 0.15\,\IoU_{\mathrm{ongoing}}
+  \label{eq:additive}
+\end{equation}
+holds exactly. Two submissions that differ in one block therefore measure that block's change exactly, up to the
+five-decimal rounding of Kaggle scores ($\pm5\times10^{-6}$ per score, or about $\pm7\times10^{-5}$ in an IoU). The
+organizer's baseline table (\cref{tab:baselines}) anchors absolute values: persistence predicts nothing on onset
+windows, so its $\Squeue=0.3017$ is half of an ongoing IoU of 0.6034.
+
+Chaining single-block contrasts from that anchor identifies the values in \cref{tab:components}. The chain closes:
+rebuilding J1 from its identified parts gives 0.84461, exactly its Kaggle score. Two steps changed two blocks at once
+(CT1 and CF1), so the state and ongoing values after them are bounded rather than identified (\cref{sec:queue-results}).
+We cannot separate $\Sstate$ from $\Sphys$ inside $B$.
+
+\begin{table}[h]
+\centering\small
+\caption{Component values identified from public scores by \cref{eq:additive}. Generated from the submission ledger
+by \code{docs/scripts/make\_figures.py}. Values are public-board measurements, not proxies.}\label{tab:components}
+\input{generated/tab_components.tex}
+\end{table}
+
+Three readings of the table matter for the rest of the report. The residual state model added +0.127 to $B$ over the
+historical-mean baseline, more than any other single change. Onset forecasting moved from zero to 0.750 IoU, worth
++0.112 in total. And ongoing forecasting, despite most of our research effort after 1 October, moved from 0.603 to
+about 0.83, worth about +0.034.
+
+\subsection{From the baselines to ES4}
+\Cref{fig:waterfall} decomposes the 0.31844 public gain from the organizer baselines to ES4 into sixteen measured steps,
+and \cref{fig:timeline} shows all 31 submissions in order.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_waterfall.pdf}
+\caption{Every public gain from the organizer baselines to ES4. Each bar is a measured difference between two Kaggle
+scores, coloured by the task whose rows changed. The RS1 and RQ2 bars are obtained by additivity from RC1, RC2 and CS1.}\label{fig:waterfall}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_leaderboard_timeline.pdf}
+\caption{All 31 submissions, 29 September to 10 October 2026. Probes isolated one task against the baselines; the
+slot-$T$ diagnostic was never a candidate. The step line follows the best legal score. \Cref{tab:history} lists every
+submission.}\label{fig:timeline}
+\end{figure}
+
+\subsection{How often proxies transferred}\label{sec:transfer}
+Seventeen submissions changed the rows of exactly one task relative to an earlier file (\cref{fig:transfer}). The contrast between
+the two halves of that figure is the most useful methodological result of the competition.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_transfer.pdf}
+\caption{Public effect of every single-block change. Each change was submitted because a local proxy or a
+measured rationale favoured it.}\label{fig:transfer}
+\end{figure}
+
+\begin{itemize}
+  \item \textbf{State changes transferred.} All six state changes that were selected on held-out training months
+        improved the public score, though by less than the held-out proxies suggested (\cref{sec:state-error}).
+        The single state loss, ES5 ($-0.00462$), is the one model fitted and selected on visible cells of the evaluation
+        month itself: it lowered visible-cell speed RMSE from 2.545 to 2.006 km/h on every corridor, yet those visible
+        cells were not a stand-in for the masked holes.
+  \item \textbf{Queue changes did not.} Five of ten queue-only changes lost. CF3's occupancy classifier gained
+        +0.0074 to +0.0085 ongoing IoU on visible March proxies and lost 0.0007 in public; the onset frequency prior kept
+        its skill leave-one-month-out on training windows and lost 0.176 onset IoU in public.
+\end{itemize}
+
+Two facts explain the asymmetry. State scores average over millions of cells, so a real improvement shows; queue
+scores average over 80 windows per split. And the visible-cell and published-window proxies differ from the hidden
+targets in kind: visible pseudo-events are noisy observations rather than latent labels, and the published windows
+are 80 events from ten days in June.
+
+\subsection{Noise and the private month}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_lb_distribution.pdf}
+\caption{Public leaderboard at the time of writing. The band around ES4 is one standard deviation of $\Stotal$
+from queue-window sampling alone, as reported by the organizers.}\label{fig:lb}
+\end{figure}
+
+On 5 November 2026 ES4 ranked 199 of 771 teams in public (\cref{fig:lb}); the median team scored 0.85148, the tenth
+0.90985 and the leader 0.93124. The organizers estimate that queue-window sampling alone moves $\Stotal$ by about 0.0126
+(one standard deviation). The private month has seven incidents against validation's five, at different places and
+times. Differences of a few thousandths between files, ours or anyone's, are therefore not a reliable forecast of the
+private order; differences in state reconstruction are the most stable part of any total.
+
+\subsection{Choosing the two final files}
+Kaggle scores two selected files. We chose them for complementary reasons.
+\begin{itemize}
+  \item \textbf{TF3} is the most defensible artefact: every component was selected on held-out training months under
+        pre-registered gates, and the whole file regenerates from the raw release with one command (all rows matched,
+        \cref{sec:repro}).
+  \item \textbf{ES4} is the best public file. It adds two changes that transferred in public: the all-month ongoing
+        classifier and the label-free short-gap recentering. It shares TF3's onset, flow and demand rows exactly.
+\end{itemize}
+ES5, the only later file, was not selected: it lost in public and its model was fitted on the evaluation month.

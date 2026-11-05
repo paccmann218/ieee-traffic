@@ -1,0 +1,93 @@
+% ======================================================= REPRODUCIBILITY ==
+\section{Reproducibility}\label{sec:repro}
+
+\subsection{Environment and hardware}
+All production runs used CPU only on one AWS EC2 \code{r7i.2xlarge} instance (8 vCPU, 64 GiB RAM, Ubuntu with glibc
+2.39) and Python 3.12.3 with the pinned packages in \cref{tab:env}. No GPU is needed. The clean regeneration of TF3
+on 4 October 2026 ran from 12:15:17 to 13:48:28 UTC (1 h 33 min) with six threads, rebuilding every cache from the
+raw release. The release and the regenerated caches need substantial free disk; the reference instance had about 70 GiB
+free.
+
+\begin{table}[h]
+\centering\small
+\caption{Pinned inference environment (\code{requirements.txt}) and the licence of each dependency.}\label{tab:env}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+Package & Version & Licence \\
+\midrule
+NumPy \cite{harris2020} & 2.5.3 & BSD-3-Clause \\
+pandas & 3.0.6 & BSD-3-Clause \\
+SciPy \cite{virtanen2020} & 1.18.1 & BSD-3-Clause \\
+PyArrow & 25.0.1 & Apache-2.0 \\
+LightGBM \cite{ke2017} & 4.7.0 & MIT \\
+scikit-learn & 1.9.1 & BSD-3-Clause \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Commands}
+The repository has one entry point. The competition release is not redistributed; \code{--release-root} is the
+directory that contains \code{submission\_key.csv}, \code{corridors/} and \code{task2/}.
+\begin{tcolorbox}[enhanced,boxrule=0pt,arc=2pt,colback=panel2,left=8pt,right=8pt,top=4pt,bottom=4pt,
+  borderline west={2.4pt}{0pt}{deep}]
+\small
+\begin{verbatim}
+# 1. verify the selected archives and the TF3 code bundle (standard library only)
+python reproduce.py
+
+# 2. regenerate TF3 from the raw release and the saved weights (no Kaggle call)
+python -m pip install -r requirements.txt
+python reproduce.py --submission tf3 --release-root /path/to/release \
+                    --out /path/to/new_tf3 --threads 6
+
+# 3. regenerate the last ES4 speed shell (gaps 3-6) from its parent, ES3
+python reproduce.py --submission es4 --release-root /path/to/release \
+                    --parent /path/to/submission_ES3.zip --out /path/to/new_es4
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{What has been verified}
+\begin{itemize}
+  \item \textbf{TF3, end to end.} The bundled driver rebuilds every cache and prediction component from the release
+        and the saved TRAIN weights, then compares all 6,980,503 rows with the submitted file. On the clean run every queue
+        label matched exactly and the largest continuous difference was $1.82\times10^{-12}$. This verifies saved-weight
+        inference; the refit procedure, seeds and inventories are recorded, but an independent retraining was not run.
+  \item \textbf{ES4.} The uploaded archive is in the repository and its checksum is verified by \code{reproduce.py}. ES4
+        equals ES3 plus the gap 3--6 shell, which \code{code/recenter\_short\_gaps.py} regenerates from ES3. The
+        intermediate archives ES1--ES3 and the all-month ongoing classifier EQ1 are not in this repository, so ES4 is
+        not regenerated end to end from the release by this repository alone. TF3, which is, scored 0.00196 (0.22\,\%)
+        below ES4 in public.
+\end{itemize}
+
+\subsection{Artefacts and checksums}
+\begin{table}[H]
+\centering\small
+\caption{SHA256 of the main artefacts. The first three are verified by \code{python reproduce.py}.}\label{tab:sha}
+\begin{tabular}{@{}l l@{}}
+\toprule
+Artefact & SHA256 \\
+\midrule
+\code{submissions/submission\_TF3.zip} & \sha{2ae94d422399c7248297487fc8f45d737de0e024fbad32b6a360c290bbabca7a} \\
+\code{submissions/submission\_ES4.zip} & \sha{ce03386b42e33bc6c726b09c0b64b791f294ea3abeb88d7e310552bb080c04bb} \\
+\code{vendor/reproduction\_TF3.zip} & \sha{dce93b3f2a38d27014497ec1a563cc1e2d032da11c499234f226c72093678cd7} \\
+TS3 frozen rule & \sha{61499049f1cced66927eff4c9e9c99bb611093c33c3a31de98ebd436940883d5} \\
+TS3 final model manifest & \sha{8ed505b54215cd88706e95dedc5b4fbee3f435e228560f8d71d018b546cf6acb} \\
+TS3 registered protocol & \sha{fcc9f299f32bc0df8dc68749df21ceb1d2bc2609fc3d2a21b15a85913c84aec0} \\
+Q46 ongoing classifier (TF3) & \sha{2816e1d3f3c233416327591c6659cd9e80a25f0054431f1b1d4ee23735b2ab46} \\
+EQ1 ongoing classifier, 800 trees (ES4) & \sha{cb626813e621064594f6956344df81d7d8879e65ebc23ae2f164a2f8f6f9ac9f} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Seeds and data membership}
+TS3 members draw their training rows with \code{random\_state} equal to the member seed (20261104 or 20261204) plus
+the panel index; the RS1 development samples used 20261001 plus the panel index; EQ1's additional windows used
+20261240 plus the panel index. The fit manifests in the TF3 bundle record the fitting months, row counts and input
+hashes of every saved model, and two independent audits recomputed every stored weekday profile (31,783,763 fitting
+rows) exactly.
+
+\subsection{External data and licence declaration}
+No external dataset, pretrained model, paid or rate-limited API or proprietary dependency was used. The only data are
+the competition release, used under the competition rules and not redistributed here. All software dependencies are
+open source under the licences in \cref{tab:env}. Figures were produced with Matplotlib and the report with \LaTeX.
+Our own code is released under the MIT licence.

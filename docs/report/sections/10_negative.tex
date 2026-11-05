@@ -1,0 +1,87 @@
+% ============================================================== NEGATIVE ==
+\section{Negative results}\label{sec:negative}
+
+Most of what we built did not ship. We list the rejected branches because they bound what the data support, and
+because several are natural first ideas for this benchmark. Each was registered with a fixed gate before its result
+was seen; no failed branch was rescued by changing the gate afterwards. Numbers marked \proxy{} are local proxies;
+the others are Kaggle public changes. The physics-based reconstructions are in \cref{tab:physics}.
+
+\needspace{14\baselineskip}
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}p{0.11\linewidth} p{0.33\linewidth} p{0.39\linewidth} p{0.11\linewidth}@{}}
+\caption{Rejected branches.}\label{tab:negative}\\
+\toprule
+ID & Idea & Evidence & Decision \\
+\midrule
+\endfirsthead
+\toprule
+ID & Idea & Evidence & Decision \\
+\midrule
+\endhead
+\midrule\multicolumn{4}{r}{\footnotesize continued on the next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\multicolumn{4}{@{}l}{\textbf{\sffamily State}}\\
+L0 & Plain time interpolation instead of the residual model & public $-$0.00867 & keep model \\
+ES5 & Speed model fitted on odd March days, applied to hidden March holes & visible RMSE 2.545 $\to$ 2.006\proxy{} on every corridor; public $-$0.00462 & rejected \\
+--- & Weekday profile from the split's own masked observations & February piece 0.375 vs interpolation 0.790\proxy{} & rejected \\
+TS1 & Covariance adaptation of the state model & lost on all ten panels, both development months\proxy & rejected \\
+TS2 & Group-RMSE training loss & joint +0.00007\proxy{} but $\Sstate$ fell in both months & failed gate \\
+TA2 & Regional spatial modes & lost on all ten panels, both months\proxy & rejected \\
+S13 & Density correction allocated by LWR edge coverage & February improved 5 of 10 panels (8 required)\proxy & failed gate \\
+FS1 arms & Full flow replacement; replacement only under R3; rank-24 and flow-only wider gates & lost or did not win development\proxy & not used \\
+--- & Replace short-gap speeds by the interpolant & ES1 differs from the interpolant by 1.39 km/h (mean absolute) on March one-slot cells, while the interpolant's February RMSE on such cells is 2.37 km/h\proxy & rejected \\
+--- & Restore pre-recentering speeds on hard holes (ES6) & undoes the bias shift without restoring model skill & built, withheld \\
+--- & Link-by-hour bias split & RMSE 2.7560 $\to$ 2.7567\proxy{} (gate $-$0.15) & failed gate \\
+--- & December speed/flow bin calibration & January RMSE 1.6491 $\to$ 1.6450\proxy{} (gate $-$0.05) & failed gate \\
+--- & Weekday/weekend split of the link bias & 1.6450 $\to$ 1.6455\proxy & failed gate \\
+--- & One-sided and long-gap shells & signal 732 vs bar 850,000 (cell-weighted km$^2$/h$^2$)\proxy & too small \\
+--- & Flow recentering on one-slot cells & March link offset 10.9 veh/h RMS (bar 20)\proxy & too small \\
+ES0 & Structured inner masks for self-supervision & target and visible-cell gap geometry already identical; structured masks worsened the match\proxy & closed \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\sffamily Onset}}\\
+U3 & Training frequency prior at $T{+}30$ (top three links) & leave-one-month-out 0.558\proxy; public onset IoU 0.626 $\to$ 0.450 & rejected \\
+CS3 & Complete onset demand history from TRAIN ramp profiles & public onset IoU 0.750 $\to$ 0.712 & rejected \\
+RQ54 & Direct onset action-value regression & training gain, April loss\proxy & rejected \\
+RQ60 & Whitened correlation for onset retrieval & lost April and held TRAIN\proxy & rejected \\
+--- & Bottleneck placement (highest flow/capacity, largest occupancy rise) & IoU 0 on all 40 published onsets\proxy{} vs analogue 0.936 & rejected \\
+--- & Same-month (earlier-day) onset priors & 0.105 and 0.333 vs analogue 0.776 and 0.726\proxy & rejected \\
+--- & More or fewer onset neighbours, frozen on odd dates & 50 neighbours 0.706 vs deployed 0.704 on even dates\proxy & no gain \\
+--- & Reranker over onset actions & 0.691 vs 0.704\proxy{} on even dates & rejected \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\sffamily Ongoing}}\\
+RC1 & RQ7 ongoing with RQ12 onset bundle & public $-$0.00798 vs J1 queues & rejected \\
+CS2 & Five-minute analogue origins & public $-$0.0039 & rejected \\
+CF3 & Occupancy-aware classifier RQ59 & +0.0074 to +0.0085\proxy{} on March; public $-$0.0001 & selected, lost \\
+Q22 & Neural blend with the Q19 classifier & failed its confirmation gate\proxy & rejected \\
+Q34 & Better masked-history imputation & history RMSE 0.055 $\to$ 0.026\proxy, forecast lost on both samples & rejected \\
+Q36 & Explicit site identifiers & failed confirmation\proxy & rejected \\
+TQ1, TQ2 & Event-census queue models & TQ2 February +0.0038, published June $-$0.0010\proxy & failed gate \\
+FQ2, FQ3 & Exact Bernoulli first-crossing law; three-model blend & April confirmation losses\proxy & rejected \\
+RQ49--52 & Copula ranks; phase experts; space--time binary field; hindcaster & March or April losses, or no future-overlap gain\proxy & rejected \\
+RQ53P & Partial likelihood over 64 trajectories per link & March +0.0042, April +0.0013\proxy{} (bar 0.003) & failed gate \\
+RQ55 & Better optimization of the RQ48 utility & higher objective, lower overlap in both months\proxy & rejected \\
+RQ56--58 & Per-horizon classifiers; auxiliary thresholds; date-cluster bagging & below the 0.003 bar or losses\proxy & rejected \\
+RQ61--62 & Scaling (similarity) augmentation of the traffic law & lost confirmation, or lost to RQ59\proxy & rejected \\
+--- & Front rollout from the legal hour & 0.234 vs persistence 0.755\proxy & rejected \\
+--- & Median remaining-duration rollout & 0.263 vs forward-fill 0.665\proxy & rejected \\
+--- & Yesterday's masked queue; clock-time prior & 0.249 vs 0.569; 0.538 vs 0.718\proxy & rejected \\
+--- & History-only queue-dynamics model & 0.831 vs analogue 0.836 (bar 0.856)\proxy & failed gate \\
+--- & Rerankers, per-link copies, neighbour-bit model & see \cref{sec:queue-results} & failed gates \\
+--- & Same-month March library; March-fit binary model & 0.324 and 0.794 vs 0.836\proxy{} on even dates & rejected \\
+--- & Newell envelope rolled six steps & ongoing 0.162 vs 0.866; onset 0.006 vs 0.675\proxy & rejected \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\sffamily Demand}}\\
+T4-v2, v4, v5 & Smooth correction, entropy fit, gravity seed & implied $\Sodme$ 0.468, 0.843, 0.622 vs 0.994 & rejected \\
+\end{longtable}}
+
+\begin{notebox}[What the failures have in common]
+Three patterns recur. Models fitted to the evaluation month's visible cells (ES5, same-month profiles, the March
+library) learned that month's visible behaviour and did not transfer to its hidden cells. Physically motivated
+dynamics (rollouts, envelopes, solvers) lost to empirical analogues and to temporal evidence, because the forcing
+that matters, incidents and the moment of breakdown, is not in the twelve legal slots. And better local objectives
+(RQ55's utility, Q34's imputation) did not imply better forecasts: improvements must be measured on the score that
+counts, on held-out data.
+\end{notebox}

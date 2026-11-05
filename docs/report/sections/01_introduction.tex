@@ -1,0 +1,86 @@
+% ========================================================== INTRODUCTION ==
+\section{Introduction}\label{sec:intro}
+
+A traffic management centre does four things in sequence. It fills the gaps in its detector feed, it asks
+where congestion will be in half an hour, it checks that its picture of the road is physically possible,
+and it estimates where the traffic is coming from and going to. TrafficFlowBench \cite{tfb2026} turns that
+loop into one leaderboard. Ten directional freeway panels, five-minute resolution and eleven months of
+records are scored by
+\begin{equation}
+  \Stotal = 0.35\,\Sstate + 0.30\,\Squeue + 0.15\,\Sphys + 0.20\,\Sodme ,
+  \label{eq:total}
+\end{equation}
+where each component lies in $[0,1]$. The tasks interlock by design. Physics is not submitted at all: it is read
+off the reconstructed state. A reconstruction can match every detector to within noise and still create or
+destroy vehicles between neighbouring links, a failure that squared error does not see. Queue forecasts begin
+from the same congested region that the reconstruction must get right, and demand estimation needs counts that
+are consistent with the flows.
+
+The data are synthetic. A traffic-flow model whose parameters were measured from real freeway detector data
+on these same corridors generated every split, so the records obey traffic physics and carry realistic measurement error, but no
+external source contains the answers. Validation (March 2031) drives the public leaderboard and private
+(April 2031) the final ranking. They are independently generated months with different incidents, five
+in validation and seven in private, so a method tuned to the public month learns that month's incidents rather
+than the traffic.
+
+\subsection{What this report contributes}
+\begin{itemize}
+  \item \Tstate{} \textbf{A residual reconstruction model} that learns the error of same-day temporal interpolation
+        from 92 features built only from the masked layer (\cref{sec:state}). It is reconciled with a predicted
+        density, corrected on the free-flow branch by spatial covariance and low-rank factor models, averaged over
+        three independently sampled fits, and finally recentred per link on short gaps where a two-stage bias test
+        shows the same-day interpolant to be unbiased.
+  \item \Tqueue{} \textbf{Queue forecasting under a strict twelve-slot information contract} (\cref{sec:queue}): forward-filled
+        persistence that keeps dropped sensors, a joint-mask onset analogue that chooses the Bayes action for
+        intersection-over-union over complete training outcomes \cite{nowozin2014}, and an ongoing-queue decoder that mixes
+        a first-crossing classifier with a trajectory-analogue library \cite{lorenz1969}.
+  \item \Todme{} \textbf{Exact split-specific demand estimation} by non-negative least squares
+        \cite{lawson1974}, which reproduces the organizer's own reference solve (\cref{sec:odme}).
+  \item \textbf{The leaderboard as an instrument} (\cref{sec:leaderboard}). The four tasks are scored on disjoint rows, so
+        \cref{eq:total} is exactly additive. With the organizer baseline table as an anchor, single-component
+        submissions identify component scores to rounding. We publish the full ledger of 31 submissions and the
+        component values it implies.
+  \item \Tphys{} \textbf{An honest account of what failed} (\cref{sec:physics,sec:negative}), including Godunov
+        \cite{godunov1959,daganzo1994}, Newell \cite{newell1993} and diagram-inversion reconstructions that all lost to
+        temporal interpolation on held-out months, and more than thirty queue, state and demand variants rejected by
+        pre-registered gates.
+  \item \textbf{Reproducibility engineering} (\cref{sec:repro}). TF3 and its predecessors passed an independent full-row
+        parser and a clean regeneration of all 6,980,503 rows from the release and saved weights before upload; each
+        file was uploaded exactly once and confirmed by a separate read-only listing.
+\end{itemize}
+
+\subsection{The two selected files}
+The Kaggle dashboard selects two submissions (\cref{tab:selected}). TF3 is the cleanest end-to-end artefact:
+it is regenerated from the raw release by one command, and that run matched all rows. ES4 is our best public
+score. It keeps TF3's demand and flow, replaces the ongoing-queue labels with a classifier refit on all nine
+training months, and removes a per-link speed bias on gaps of one to six slots. The two files contain the same
+6,980,503 rows and differ in 5,825,667 speed values and all 87,000 ongoing-queue cells; onset labels, flows and
+path flows are identical.
+
+\begin{table}[h]
+\centering\small
+\caption{The two submissions selected for final scoring. Public scores are Kaggle results; no private score was
+available at the time of writing.}\label{tab:selected}
+\begin{tabular}{@{}l l l r l@{}}
+\toprule
+Submission & Kaggle ref. & Uploaded (UTC) & Public score & Archive SHA256 (first 16 hex) \\
+\midrule
+TF3 & 56825669 & 2026-10-04 13:51:11 & 0.86991 & \sha{2ae94d422399c724\ldots} \\
+ES4 & 56998048 & 2026-10-09 07:13:22 & \textbf{0.87187} & \sha{ce03386b42e33bc6\ldots} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{notebox}[How to read the numbers in this report]
+Only Kaggle returns leaderboard scores. Every other figure is a \emph{proxy}: an error measured on held-out
+training months whose labels are released, on visible cells of the evaluation months that we masked ourselves,
+or on the 80 published training queue windows. We say which proxy every number comes from. A proxy gain is not
+a leaderboard forecast, and \cref{sec:transfer} shows how often our queue proxies failed to transfer.
+\end{notebox}
+
+\subsection{Organization}
+\Cref{sec:benchmark} describes the benchmark and the properties of its design that shaped our method.
+\Cref{sec:protocol} states the information boundaries and the experimental protocol. \Cref{sec:architecture}
+gives the system architecture, and \cref{sec:state,sec:physics,sec:queue,sec:odme} treat the four tasks.
+\Cref{sec:leaderboard} analyses the leaderboard evidence, \cref{sec:negative} lists negative results and
+\cref{sec:discussion} discusses error, limitations and future work. \Cref{sec:repro} documents reproduction.

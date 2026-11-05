@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Research question or proposed experiment
+    url: https://github.com/NaomiiAP/ieee-traffic/blob/main/CONTRIBUTING.md#experiment-protocol
+    about: Read the experiment protocol first, then open a blank issue that registers the hypothesis and its gate before any results.
+  - name: Competition rules and data
+    url: https://www.kaggle.com/competitions/2026-ieee-big-data-traffic-flow-bench/rules
+    about: Questions about the competition itself belong with the organizers.

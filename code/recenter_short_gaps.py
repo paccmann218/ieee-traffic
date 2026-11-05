@@ -13,6 +13,7 @@ submissions/ is the file that was uploaded.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import zipfile
 from pathlib import Path
@@ -21,11 +22,14 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+# The shared estimators (cache, t1_base, t1_features) live in tfb/.
+sys.path.insert(0, str(ROOT / "tfb"))
 
-import cache
-from t1_base import interp_day
-from t1_features import prev_next
+# Imported in main(), after TFB_REL and TFB_CACHE point at the release and the
+# cache directory, because these modules read both paths at import time.
+cache = None
+interp_day = None
+prev_next = None
 
 
 COLUMNS = ["submission_id", "task", "speed_kmh", "flow_vph", "queue_pred", "path_flow"]
@@ -98,14 +102,36 @@ def link_shifts(z, part, speeds, shells):
     return pieces
 
 
+def load_modules(release_root: Path, cache_root: Path):
+    global cache, interp_day, prev_next
+    os.environ["TFB_REL"] = str(release_root)
+    os.environ["TFB_CACHE"] = str(cache_root)
+    import cache as cache_module
+    from t1_base import interp_day as interp
+    from t1_features import prev_next as neighbours
+    cache_module.REL = release_root
+    cache_module.OUT = cache_root
+    cache, interp_day, prev_next = cache_module, interp, neighbours
+
+
+def load_cache(panel: str, split: str):
+    """Load the dense cache for one panel and split, building it from the release if absent."""
+    if not (cache.OUT / f"{panel}_{split}.npz").is_file():
+        cache.build(panel, split)
+    return cache.load(panel, split)
+
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--release-root", type=Path, required=True)
-    parser.add_argument("--parent", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--shells", default="3-6")
+    parser = argparse.ArgumentParser(description="Recenter short-gap speeds of a parent submission.")
+    parser.add_argument("--release-root", type=Path, required=True,
+                        help="Directory with submission_key.csv, corridors/ and task1/")
+    parser.add_argument("--parent", type=Path, required=True, help="Parent submission zip (ES3 for the ES4 shell)")
+    parser.add_argument("--out", type=Path, required=True, help="Output directory")
+    parser.add_argument("--shells", default="3-6", help="Comma-separated gap shells, e.g. 1,2,3-6")
+    parser.add_argument("--cache-root", type=Path, default=None,
+                        help="Dense cache directory (default: <out>/cache); built from the release when missing")
     args = parser.parse_args()
-    cache.REL = args.release_root
+    load_modules(args.release_root.resolve(), (args.cache_root or args.out / "cache").resolve())
     shells = parse_shells(args.shells)
     key = pd.read_csv(args.release_root / "submission_key.csv", dtype=str)
     with zipfile.ZipFile(args.parent) as archive:
@@ -118,7 +144,7 @@ def main():
     for panel in cache.PANELS:
         for split in ("validation", "private"):
             part = key.loc[state & key.panel.eq(panel) & key.split.eq(split)]
-            z = cache.load(panel, split)
+            z = load_cache(panel, split)
             for apply, corrected, use, count, rms in link_shifts(z, part, speeds.loc[part.index], shells):
                 print(panel, split, count, round(rms, 4), use, flush=True)
                 if not use:

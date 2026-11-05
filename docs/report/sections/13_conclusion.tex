@@ -1,0 +1,13 @@
+% ============================================================ CONCLUSION ==
+\section{Conclusion}\label{sec:conclusion}
+
+We built a pipeline for TrafficFlowBench from measured, single changes and kept a strict information boundary
+throughout. Its strongest parts are simple: learn the residual of temporal interpolation, choose whole onset masks
+by expected IoU, carry dropped sensors forward, and solve the demand system exactly. Its weakest part is equally
+clear: the choice among good candidate queue futures. Using the additivity of the score, we turned 31 submissions into
+a controlled ablation, and it showed that held-out-month state improvements transfer to a new month while queue
+proxies often do not. We hope the negative results, in particular that four kinds of physics-based reconstruction
+lost to temporal evidence on held-out months, save the next team some time.
+
+Our best file scores 0.87187 in public; the second, 0.86991, regenerates from the raw release with one command.
+Both are documented, checksummed and selected for the private leaderboard.

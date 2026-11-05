@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: "If you use this code or the findings in its report, please cite it as below."
+title: "Residual Reconstruction, Analogue Forecasting and Exact Demand Estimation for Freeway Traffic: TrafficFlowBench final package of team Powerbuff Girls"
+type: software
+authors:
+  - given-names: Naomi
+    family-names: Pereira
+    alias: naomiandreapereira
+    affiliation: "Department of Information Science and Engineering, Ramaiah Institute of Technology, Bengaluru, India"
+  - given-names: Harshendra
+    family-names: M
+    alias: hersheyz
+    affiliation: "Department of Information Science and Engineering, Ramaiah Institute of Technology, Bengaluru, India"
+repository-code: "https://github.com/NaomiiAP/ieee-traffic"
+license: MIT
+version: "1.0.0"
+date-released: "2026-11-05"
+abstract: >-
+  Code, saved weights, selected submissions and a 37-page report for the 2026 IEEE Big Data Cup TrafficFlowBench
+  competition. State is reconstructed by gradient-boosted trees on the residual of temporal interpolation; queue onsets
+  and ongoing queues are forecast from twelve legal history slots by expected-IoU decisions over training analogues;
+  path flows are an exact split-specific non-negative least-squares solve. The best selected file scores 0.87187 on the
+  public leaderboard.
+keywords:
+  - traffic state estimation
+  - queue forecasting
+  - fundamental diagram
+  - LWR conservation
+  - analogue forecasting
+  - gradient boosting
+  - origin-destination estimation
+  - reproducibility
+preferred-citation:
+  type: report
+  title: "Residual Reconstruction, Analogue Forecasting and Exact Demand Estimation for Freeway Traffic: Final Report of Team Powerbuff Girls, TrafficFlowBench"
+  authors:
+    - given-names: Naomi
+      family-names: Pereira
+      affiliation: "Department of Information Science and Engineering, Ramaiah Institute of Technology, Bengaluru, India"
+    - given-names: Harshendra
+      family-names: M
+      affiliation: "Department of Information Science and Engineering, Ramaiah Institute of Technology, Bengaluru, India"
+  institution:
+    name: "2026 IEEE Big Data Cup"
+  year: 2026
+  month: 11
+  url: "https://github.com/NaomiiAP/ieee-traffic"
+references:
+  - type: dataset
+    title: "TrafficFlowBench: a four-task freeway traffic benchmark"
+    authors:
+      - family-names: Wu
+        given-names: Jinxi
+    year: 2026
+    url: "https://github.com/jacky850/trafficflowbench-public"
+    license: MIT

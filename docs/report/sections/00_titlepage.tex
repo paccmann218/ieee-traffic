@@ -1,0 +1,127 @@
+% ============================================================ TITLE PAGE ==
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  % top band
+  \fill[deep] (current page.north west) rectangle ([yshift=-131mm]current page.north east);
+  \fill[accent] ([yshift=-131mm]current page.north west) rectangle ([yshift=-132.6mm]current page.north east);
+  % faint space-time grid motif in the band
+  % space-time motif: a congestion wave moving upstream across a link-by-time grid
+  \begin{scope}[shift={([xshift=-58mm,yshift=-62mm]current page.north east)}]
+    \foreach \i in {0,...,8}{
+      \foreach \j in {0,...,10}{
+        \pgfmathsetmacro{\d}{abs(\j-0.8*\i-2.0)}
+        \pgfmathsetmacro{\o}{\d<1.6 ? 0.62 : (\d<3 ? 0.28 : 0.09)}
+        \fill[white,opacity=\o] (\i*4.4mm,\j*4.4mm) rectangle ++(3.7mm,3.7mm);
+      }
+    }
+  \end{scope}
+  \node[anchor=north west,text=white!80!accent,font=\sffamily\bfseries\small,inner sep=0]
+    at ([xshift=24mm,yshift=-22mm]current page.north west) {2026 IEEE BIG DATA CUP \quad\textperiodcentered\quad TRAFFICFLOWBENCH};
+  \node[anchor=north west,text=white,font=\sffamily\bfseries\fontsize{24}{29}\selectfont,text width=118mm,align=left,inner sep=0,
+        execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}]
+    at ([xshift=24mm,yshift=-34mm]current page.north west)
+    {Residual Reconstruction, Analogue Forecasting and Exact Demand Estimation for Freeway Traffic};
+  \node[anchor=north west,text=white!85!accent,font=\large,text width=118mm,align=left,inner sep=0,
+        execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}]
+    at ([xshift=24mm,yshift=-80mm]current page.north west)
+    {A leakage-controlled multi-task pipeline, a public-leaderboard ablation of 31 submissions, and a catalogue of what did not work};
+  \node[anchor=south west,text=white,align=left,inner sep=0]
+    at ([xshift=24mm,yshift=-122mm]current page.north west)
+    {{\sffamily\bfseries\large \authorlist}\\[2.2mm]
+     {\sffamily\small\color{white!85!accent}\teamstatus}\\[0.6mm]
+     {\sffamily\small\color{white!85!accent}\teamaffiliation}\\[2.2mm]
+     {\sffamily\footnotesize\color{white!70!accent}Team \teamname\quad\textperiodcentered\quad\teammembers}};
+\end{tikzpicture}
+
+\vspace*{116mm}
+
+{\sffamily\bfseries\color{deep}\large Results at a glance}\par\vspace{4mm}
+\newcommand{\tile}[3]{%
+  \begin{tcolorbox}[enhanced,boxrule=0pt,arc=2pt,colback=#3,width=\linewidth,left=8pt,right=6pt,top=7pt,bottom=7pt,
+    borderline north={1.6pt}{0pt}{accent}]
+    {\sffamily\bfseries\fontsize{19}{22}\selectfont\color{deep}#1}\par\vspace{2pt}
+    {\raggedright\sffamily\footnotesize\color{ink2}#2\par}
+  \end{tcolorbox}}
+\begin{tcbraster}[raster columns=3,raster equal height,raster column skip=4mm,raster row skip=3mm]
+  \tile{0.87187}{Public score of ES4, our best and selected final file (Kaggle ref.\ 56998048)}{panel}
+  \tile{0.86991}{Public score of TF3, the second selected file, regenerable end to end from the release}{panel}
+  \tile{199 / 771}{Public-leaderboard rank, downloaded 5 November 2026 12:26 UTC (top 26\,\%)}{panel}
+  \tile{+0.31844}{Public gain over the organizer baselines (0.55343), decomposed into 16 measured steps}{panel}
+  \tile{6{,}980{,}503}{Submission rows regenerated from released inputs; queues exact, max.\ error $1.8\times10^{-12}$}{panel}
+  \tile{31}{Kaggle submissions, every one logged and used as a controlled measurement}{panel}
+\end{tcbraster}
+
+\vspace{3mm}
+{\sffamily\bfseries\color{deep}\large Selected submissions}\par\vspace{2mm}
+{\small
+\begin{tabularx}{\linewidth}{@{}l l l r X@{}}
+\toprule
+File & Kaggle ref. & Submitted (UTC) & Public & Content \\
+\midrule
+\code{submission\_TF3.zip} & 56825669 & 2026-10-04 13:51 & 0.86991 & Three-member reconstruction ensemble, analogue queues, exact demand \\
+\code{submission\_ES4.zip} & 56998048 & 2026-10-09 07:13 & \textbf{0.87187} & TF3 + all-month ongoing classifier + short-gap link-bias recentering \\
+\bottomrule
+\end{tabularx}}
+
+\vfill
+{\sffamily\footnotesize\color{muted}
+Report version 1.0, 5 November 2026. Code: \url{\repourl}. Public scores are Kaggle results; every other number
+in this report is a local proxy unless stated otherwise, and is labelled as such. No private score had been
+released when this report was written.\par}
+\end{titlepage}
+
+% ============================================================== ABSTRACT ==
+\setcounter{page}{2}
+\begin{absbox}
+{\sffamily\bfseries\color{deep}\Large Abstract}\par\smallskip
+TrafficFlowBench asks for four coupled answers on ten synthetic but physically calibrated freeway corridors:
+reconstruct masked speed and flow, forecast which links will be queued over the next 30 minutes, keep the
+reconstruction consistent with the fundamental diagram and vehicle conservation, and recover path-level demand
+from link counts. We describe the pipeline behind our two selected submissions. State is reconstructed by
+gradient-boosted trees that learn the \emph{residual} of temporal interpolation from 92 masked-data features,
+reconciled with a predicted density, corrected on the free-flow branch by spatial covariance and low-rank
+factor models, averaged over three independently sampled fits, and finally recentred on short temporal gaps
+where a per-link bias test shows the same-day interpolant to be unbiased. Queues are forecast from exactly the
+twelve legal history slots: onsets by a joint-mask analogue that maximizes empirical expected IoU over complete
+training outcomes, ongoing queues by a first-crossing classifier combined with a trajectory-analogue library
+through an expected-IoU decoder. Demand is the exact non-negative least-squares solution on each split's own
+counts and prior. Because the four tasks are scored on disjoint rows, the leaderboard total is exactly additive,
+and we use 31 submissions as a controlled ablation that identifies component scores to within rounding.
+The best file scores \textbf{0.87187} in public (rank 199 of 771 on 5 November 2026). We report what the
+leaderboard confirms: state reconstruction (+0.127) and onset forecasting (+0.112) carry most of the gain over
+the baselines; every state change selected on held-out training months improved the public score, while only
+half of the queue-only changes did. We also document more than thirty rejected branches, including
+Godunov, Newell and diagram-inversion reconstructions that all lost to temporal interpolation on held-out months.
+\end{absbox}
+
+\vspace{4mm}
+\begin{keybox}[Main findings]
+\begin{enumerate}[leftmargin=1.4em,itemsep=3pt]
+  \item \textbf{Learn the residual, not the field.} A tree ensemble on the residual of same-day temporal interpolation
+        roughly halves speed error at every mask rate and every gap length on a held-out month
+        (\cref{sec:state}). The public board confirms it: replacing the model with plain interpolation costs 0.00867.
+  \item \textbf{Physics is a scoring constraint here, not a better predictor.} The released diagram is satisfied
+        almost exactly by any accurate field ($\SFD$ 0.984--0.994 on every panel). Godunov, steady-flux, diagram-inversion
+        and Newell reconstructions all lost on held-out months, by 0.06 to 0.52 in the state piece (\cref{sec:physics}).
+  \item \textbf{Most queue skill comes from not throwing information away.} Forward-filling dropped sensors is worth
+        +0.135 ongoing IoU over organizer persistence and beats a diagnostic that reads slot $T$; preserving the
+        joint shape of onset masks is worth +0.124 IoU over a per-link classifier (\cref{sec:queue}).
+  \item \textbf{The open problem is selection, not representation.} On the 40 published ongoing windows the analogue's
+        own candidate set contains an action scoring 0.934 IoU, but its rule picks one scoring 0.836; no frozen selection
+        rule we tested closed that gap (\cref{sec:queue-results}).
+  \item \textbf{Demand is solved by solving the right system.} Exact NNLS on each split's own counts lifts $\Sodme$ from
+        0.836 to an implied 0.994; prior-modelling alternatives all lost (\cref{sec:odme}).
+  \item \textbf{Proxies transfer for state and are noisy for queues.} 6 of 6 TRAIN-selected state changes improved the
+        public score; only 5 of 10 queue-only changes did. Queue scores carry a sampling standard deviation of
+        about 0.0126 in $\Stotal$ (\cref{sec:leaderboard}).
+\end{enumerate}
+\end{keybox}
+
+\newpage
+{\hypersetup{linkcolor=ink}
+\setcounter{tocdepth}{2}
+\titlecontents{section}[1.8em]{\addvspace{4pt}\sffamily\bfseries}{\contentslabel{1.8em}}{}{\titlerule*[0.6pc]{.}\contentspage}
+\titlecontents{subsection}[4.2em]{\small}{\contentslabel{2.4em}}{}{\titlerule*[0.6pc]{.}\contentspage}
+\tableofcontents}
+\newpage

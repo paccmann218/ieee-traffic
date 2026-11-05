@@ -1,0 +1,46 @@
+% ========================================================== ARCHITECTURE ==
+\section{System architecture}\label{sec:architecture}
+
+\Cref{fig:architecture} shows the deployed pipeline. Three independent lanes produce the three row blocks of the
+submission; Task 3 has no lane of its own and is scored by the evaluator from the state rows. The lanes share
+nothing at inference time: in particular the offline state reconstruction never feeds a queue forecast, which keeps
+the Task 2 information set to its twelve legal slots. Every learned artefact (trees, profiles, factor and covariance
+models, the queue classifier, the onset event pool and the trajectory library) is fitted on the training split.
+
+\begin{figure}[t!]
+\centering
+\input{figures/architecture_diagram.tex}
+\caption{Deployed architecture of ES4. TF3 is identical except that it lacks the gap-shell recentering stage and uses
+the earlier Q46 classifier in place of EQ1. Colours mark tasks. Solid arrows are data flow at inference; the dashed
+arrow is the evaluator's own computation. Nothing flows between lanes.}\label{fig:architecture}
+\end{figure}
+
+\subsection{Component lineage}
+The pipeline grew by single, measured changes. \Cref{tab:lineage} lists every deployed component, the submission
+that introduced it and the public change that measured it. \Cref{app:glossary} expands the identifiers.
+
+\begin{table}[h]
+\centering\small
+\caption{Components of the selected files and the public evidence for each. ``Public $\Delta$'' is the change in
+Kaggle public score in the submission that introduced the component. Two rows changed two components at once, and
+the RQ2 value follows from additivity (CS1 = J1 + RS1 state + RQ2 ongoing, \cref{sec:leaderboard}).}\label{tab:lineage}
+\begin{tabularx}{\linewidth}{@{}X l l r c c@{}}
+\toprule
+Component & Task & Introduced in & Public $\Delta$ & TF3 & ES4 \\
+\midrule
+Exact split-specific NNLS demand & ODME & T4-v1, 29 Sep & +0.03158 & \checkmark & \checkmark \\
+Residual GBDT on temporal interpolation & State & V1, 30 Sep & +0.12691 & (RS1) & (RS1) \\
+Joint-mask onset analogue & Onset & J1, 1 Oct & +0.01861 & \checkmark & \checkmark \\
+Forward-filled persistence & Ongoing & U2, 1 Oct & +0.02021 & candidate & candidate \\
+RS1 enhanced residual model + density & State & RC2, 2 Oct & +0.00974 & \checkmark & \checkmark \\
+Trajectory-analogue decoder (RQ2) & Ongoing & CS1, 2 Oct & +0.00414 & \checkmark & \checkmark \\
+S5 speed correction, Q19 features & State, ongoing & CT1, 3 Oct & +0.00039 & \checkmark & \checkmark \\
+S10 factor flow, S12 covariance speed & State & CT2, 3 Oct & +0.00151 & \checkmark & \checkmark \\
+FS1 gate, Q46 first-crossing classifier & State, ongoing & CF1, 3 Oct & +0.00449 & \checkmark & FS1 only \\
+RQ48 quarter-prior decoder & Ongoing & CF2, 3 Oct & +0.00469 & \checkmark & \checkmark \\
+Three-member sample ensemble (TS3) & State & TF3, 4 Oct & +0.00034 & \checkmark & \checkmark \\
+All-month ongoing classifier (EQ1) & Ongoing & ES1, 4 Oct & +0.00039 & --- & \checkmark \\
+Gap-shell recentering, shells 1 / 2 / 3--6 & State & ES2--ES4, 4--9 Oct & +0.00157 & --- & \checkmark \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,44 @@
+\begin{tabular}{@{}r l l l r r@{}}
+\toprule
+\# & ID & Content & Submitted (UTC) & Kaggle ref & Public \\
+\midrule
+1 & BASE & Organizer baselines for all tasks & 09-29 14:35 & 56678924 & 0.55343 \\
+2 & T4-v2 & ODME: prior $\times$ smooth correction & 09-29 14:35 & 56678929 & 0.47983 \\
+3 & T4-v4 & ODME: KL/entropy on raw prior & 09-29 14:41 & 56679085 & 0.55476 \\
+4 & T4-v5 & ODME: KL from gravity seed & 09-29 14:47 & 56679260 & 0.51071 \\
+5 & T4-v1 & ODME: exact NNLS on own split & 09-29 14:50 & 56679323 & 0.58501 \\
+\addlinespace[2pt]
+6 & V1 & GBDT state, LightGBM queues & 09-30 00:01 & 56690702 & 0.80613 \\
+7 & P-persq & V1 state + persistence queue & 09-30 02:34 & 56694937 & 0.71192 \\
+8 & P-noonset & V1 with onset zeroed & 09-30 02:39 & 56695043 & 0.71024 \\
+9 & V1-nh & V1, ongoing tree on unfiltered windows & 09-30 02:57 & 56695413 & 0.80946 \\
+10 & P-slotT & Ongoing = state at slot $T$ (diagnostic) & 09-30 03:00 & 56695475 & 0.82669 \\
+\addlinespace[2pt]
+11 & U1 & Legal onset classifier (12 slots) & 10-01 00:01 & 56722539 & 0.80579 \\
+12 & U2 & U1 + ongoing forward-fill & 10-01 00:02 & 56722689 & 0.82600 \\
+13 & J1 & U2 + joint-mask onset analogue & 10-01 03:50 & 56742868 & 0.84461 \\
+14 & L0 & U2 with time-interpolated state & 10-01 03:51 & 56742874 & 0.81733 \\
+15 & U3 & U2 + onset frequency prior & 10-01 05:09 & 56744081 & 0.79958 \\
+\addlinespace[2pt]
+16 & RC1 & RQ7 ongoing + RQ12 onset & 10-02 00:00 & 56760940 & 0.83663 \\
+17 & RC2 & RC1 + RS1 state & 10-02 00:00 & 56760945 & 0.84637 \\
+18 & CS1 & RS1 state + RQ2 ongoing + J1 onset & 10-02 21:16 & 56782501 & 0.85849 \\
+19 & CS2 & CS1, ongoing origin analogue & 10-02 21:19 & 56782536 & 0.85459 \\
+20 & CS3 & CS2 + onset demand completion & 10-02 21:21 & 56782562 & 0.84885 \\
+\addlinespace[2pt]
+21 & CT1 & S5 speed + Q19 ongoing & 10-03 00:00 & 56784219 & 0.85888 \\
+22 & CT2 & CT1 + S10/S12 state & 10-03 12:01 & 56797210 & 0.86039 \\
+23 & CF1 & FS1 gate + Q46 ongoing & 10-03 16:06 & 56801893 & 0.86488 \\
+24 & CF2 & CF1 + RQ48 decoder & 10-03 18:36 & 56804591 & 0.86957 \\
+25 & CF3 & CF2 + occupancy classifier & 10-03 21:07 & 56806709 & 0.86947 \\
+\addlinespace[2pt]
+26 & \textbf{TF3} & CF2 + 3-member sample ensemble & 10-04 13:51 & 56825669 & \textbf{0.86991} \\
+27 & ES1 & TF3 + all-month ongoing classifier & 10-04 16:07 & 56828513 & 0.87030 \\
+28 & ES2 & ES1 + gap-1 recentering & 10-04 18:21 & 56831094 & 0.87069 \\
+\addlinespace[2pt]
+29 & ES3 & ES2 + gap-2 recentering & 10-09 06:52 & 56997060 & 0.87113 \\
+30 & \textbf{ES4} & ES3 + gap 3--6 recentering & 10-09 07:13 & 56998048 & \textbf{0.87187} \\
+\addlinespace[2pt]
+31 & ES5 & ES4 + March-fit speed model & 10-10 08:17 & 57036402 & 0.86725 \\
+\bottomrule
+\end{tabular}

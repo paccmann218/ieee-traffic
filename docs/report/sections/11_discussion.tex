@@ -1,0 +1,81 @@
+% ============================================================ DISCUSSION ==
+\section{Discussion}\label{sec:discussion}
+
+\subsection{What the benchmark taught us about traffic}
+\begin{enumerate}
+  \item \textbf{At five-minute resolution, time beats space.} Links are short (many are a few hundred metres) and masked
+        holes span one to five links. A wave crosses a link in seconds, so a link's own readings five minutes before and
+        after carry more information about a hole than its neighbours at the same moment (\cref{sec:physics,sec:state-error}).
+  \item \textbf{Missing is not free flow.} About a quarter of last readings are missing or ineligible. Treating a dropped
+        sensor as ``not queued'' cost 0.135 ongoing IoU; the forecaster must carry the last observed state forward.
+  \item \textbf{Onsets are recurrent in location and random in extent.} The head of a new queue is usually a known
+        bottleneck, but how far it extends by $T{+}30$ depends on when breakdown happens inside the last five minutes,
+        which the legal hour cannot show.
+  \item \textbf{Queues have memory beyond the hour.} Clearing queues in the training windows are old (300--780 minutes)
+        and small; most growing ones are 10--20 minutes old. Queue age is visible only before $T{-}60$, outside the
+        contract we kept.
+  \item \textbf{A new month brings a link-level offset.} A model trained on other months carries per-link means into the
+        new month that the month's own anchors contradict. A label-free recentering on short gaps removed part of it.
+  \item \textbf{With a weak prior, demand is an optimization problem, not a modelling one.} The exact regularized solve on the
+        split's own counts reached an implied 0.994.
+\end{enumerate}
+
+\subsection{Where the remaining score is}
+\Cref{tab:budget} combines the identified components with the organizers' perfect-answer scores. The state block
+$B$ is bounded rather than identified after CT1 and CF1; the ongoing value inherits that bound.
+
+\begin{table}[h]
+\centering\small
+\caption{Error budget of ES4 in public-score units. ``Room'' is the ceiling minus our contribution.}\label{tab:budget}
+\begin{tabular}{@{}l r r r r@{}}
+\toprule
+Block & Component value & Contribution & Ceiling & Room \\
+\midrule
+Demand, $0.20\,\Sodme$ & 0.9938 & 0.1988 & 0.2000 & 0.0012 \\
+Onset, $0.15\,\IoU$ & 0.750 & 0.1125 & 0.1500 & 0.0375 \\
+Ongoing, $0.15\,\IoU$ & 0.827--0.832 & 0.124--0.125 & 0.1500 & 0.025--0.026 \\
+State and physics, $B$ & --- & 0.4358--0.4366 & 0.4945 & 0.058 \\
+\midrule
+Total & & 0.87187 & 0.9945 & 0.1226 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The arithmetic constrains how anyone can be above us. With our state and demand blocks, a perfect queue forecast
+($\Squeue=1$) would score at most about 0.935, and matching the public leader's 0.93124 would need $\Squeue\approx0.99$.
+Teams far above us must therefore be ahead in the state-and-physics block as well, most plausibly in conservation,
+where our block has 0.058 of room and our local instruments are weakest.
+
+\subsection{Limitations}
+\begin{itemize}
+  \item There is no private score for either file, and the public difference between them (0.00196) is far below the
+        queue-sampling standard deviation.
+  \item Local proxies were reused across many studies; March and April visible events in particular were examined
+        repeatedly, and their confidence intervals do not correct for that reuse.
+  \item The three ensemble members share features and overlapping samples. Averaging reduces sampling variance, not
+        bias they share.
+  \item The gap recentering is a link mean, not a model of shocks; gaps of eight or more slots, which failed the bias
+        test, keep the uncorrected field.
+  \item The queue selection problem is open: the candidate set contains much better masks than the ones chosen.
+  \item Our Task 2 contract is stricter than the rules. It excludes slot $T$ and same-day data before $T{-}60$, which the
+        rules allow, and so leaves the queue-age signal unused.
+  \item The local physics proxy uses observed accumulation in place of the withheld boundary flux and is not the
+        leaderboard physics score.
+  \item ES4 regenerates from the release only up to its parent: the all-month classifier weights behind ES1 are not in
+        this repository (\cref{sec:repro}).
+\end{itemize}
+
+\subsection{Future work}
+\begin{itemize}
+  \item \textbf{Learn the choice among whole masks.} Train a ranker on first-crossing windows whose target is each
+        candidate's realized IoU, and decide by expected IoU over structured outcomes rather than a fixed mixture
+        \cite{nowozin2014}. The 0.10 gap between the chosen and the best candidate is the largest identifiable lever.
+  \item \textbf{Model onset extent as breakdown timing.} Treat the extent at $T{+}30$ as a function of a breakdown time with
+        a hazard learned from the legal hour, instead of copying neighbour extents.
+  \item \textbf{Use legal same-day context.} The rules allow data before $T{-}60$. Queue age is a strong predictor of
+        clear-versus-grow on training windows and deserves a pre-registered test.
+  \item \textbf{Conservation as a soft target inside the learner.} Every hard physics projection lost. A penalty on the
+        conservation residual of neighbouring predictions, learned jointly with the residual model, has not been tried.
+  \item \textbf{Hierarchical month offsets.} Extend the recentering to flow and to longer gaps with a shrinkage estimator
+        that borrows strength across links, instead of a hard 100-cell threshold.
+\end{itemize}
