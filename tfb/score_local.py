@@ -1,13 +1,15 @@
 """Fast local scorers on dense caches (train split, where truth is released).
 
 score_t1: official Task 1 rule (per regime RMSE speed, RMSE per-lane flow, 0.54/0.46 blend, mean over regimes).
-score_t3: official Task 3 rule with the organizer boundary flux reconstructed from the truth field.
-    The legacy builder's project_onto_conservation shows the organizer flux makes the observed (truth) field
-    conserve exactly, so rhs == dN_true on every scored transition. Hence
+score_t3: Task 3 PROXY using changes in released-observation accumulation.
+    The organizer's actual boundary flux is withheld. This local calculation
+    substitutes rhs == dN_observed on every scored transition, giving
         S_LWR = 1 - sum|dN_sub - dN_true| / sum|dN_true|
     over transitions that are consecutive (dt = 5 min, both cells eligible), on observable links, with valid ramps.
     S_FD is computed on all eligible cells of the regime (targets carry our values), per lane, triangular FD.
-Validate once against repo/src/task3/score_task3.py with a written --boundary-flux file (see make_flux()).
+Agreement with score_task3.py using a deliberately constructed boundary-flux
+file validates the calculation, not the substitution for withheld flux. Its
+ranking and numerical calibration against Kaggle remain empirical questions.
 """
 from __future__ import annotations
 import numpy as np, pandas as pd

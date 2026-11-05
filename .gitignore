@@ -8,3 +8,14 @@ __pycache__/
 *.npz
 .venv/
 venv/
+work/
+deliverables/
+vendor/reproduction_TF3_extracted/
+AGENTS.md
+CURRENT_RESEARCH.md
+CHANGELOG.md
+CRITIQUE.md
+docs/_preview/
+*.log
+ec2.sh
+
