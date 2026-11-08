@@ -64,9 +64,12 @@ submissions as a controlled ablation that identifies the score of each component
 | [`submissions/submission_TF3.zip`](submissions/submission_TF3.zip) | Three-member residual reconstruction, analogue queues, exact demand; regenerates end to end | 0.86991 |
 
 Both files have 6,980,503 rows: 6,735,795 state, 174,000 queue and 70,708 ODME. They differ in 5,825,667 speed
-values and in all 87,000 ongoing-queue cells; onset labels, flows and path flows are identical. Validation scores
+values and in 247 ongoing-queue labels; onset labels, flows and path flows are identical. Validation scores
 are those returned by the evaluation platform for the March month; every other number in this repository is a local
 proxy and is labelled as one.
+
+> **Reproducing these files:** [REPRODUCIBILITY.md](REPRODUCIBILITY.md) is the full written account, covering runtime,
+> hardware, why the method cannot run in a Kaggle Notebook, versions, preprocessing, seeds, licences and commands.
 
 ### Decomposition of the improvement
 
@@ -279,19 +282,22 @@ This extracts `vendor/reproduction_TF3.zip`, rebuilds every cache from the relea
 all four tasks, and writes `submission_TF3_reproduced.csv` together with a `full_reproduction.json` of hashes and
 settings. The output directory must not exist yet.
 
-### 3. Regenerate the last ES4 shell
+### 3. Regenerate ES4 from the raw release
 
 ```bash
 python reproduce.py --submission es4 \
   --release-root /path/to/release \
-  --parent /path/to/submission_ES3.zip \
-  --out /path/to/new_es4_run
+  --out /path/to/new_es4_run \
+  --threads 6
 ```
 
-`code/recenter_short_gaps.py` applies the gap 3–6 recentering to its parent, ES3. It builds the dense caches it needs
-under `<out>/cache` (or `--cache-root`). Other shells can be applied with `--shells`, for example `1,2,3-6`.
+This runs the original stage scripts in `code/es_chain/` through TF3 → ES1 → ES2 → ES3 → ES4, and then compares every row
+with the frozen ES4. The EQ1 classifier weights were not preserved, so this command retrains EQ1 from the release. See
+the scope note below. `--submission all` regenerates both selected files.
 
 ## Reproducibility
+
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md) is the complete written account. This section is a summary.
 
 ### What has been verified
 
@@ -299,17 +305,20 @@ under `<out>/cache` (or `--cache-root`). Other shells can be applied with `--she
 | --- | --- |
 | Archive checksums of TF3, ES4 and the TF3 bundle | Verified by `python reproduce.py` |
 | TF3 regenerated from the raw release and saved weights | All 6,980,503 rows match; queues exactly, continuous values to within 1.82 × 10⁻¹² (clean run in a fresh pinned environment, every cache rebuilt) |
-| ES4 | The final archive is in `submissions/`; its last gap 3–6 shell regenerates from ES3 with `code/recenter_short_gaps.py` |
-| Retraining from scratch | The procedure, seeds and inventories are recorded in the bundle's manifests; saved-weight inference is what was verified, not an independent retraining |
+| ES4 is TF3 plus 247 ongoing labels and 5,825,667 recentered speeds | Verified row by row on the archives |
+| ES4 regeneration driver | Smoke-tested on synthetic data only. **Not yet run on the real release** |
+| Retraining from scratch | EQ1 is retrained by the ES4 command, with the result not yet confirmed. For TF3, the procedure, seeds and inventories are recorded in the bundle's manifests, and saved-weight inference is what was verified |
 
-> **Scope.** The intermediate archives ES1 to ES3 and the all-month ongoing classifier EQ1 are not stored in this
-> repository, so ES4 cannot be regenerated end to end from the release with this repository alone. TF3 can, and its
+> **Scope.** TF3 regenerates end to end and has been verified. ES4's weights for the EQ1 ongoing classifier existed only
+> on the competition's AWS instance, which no longer exists, so its 247 EQ1-dependent labels depend on a retraining whose
+> byte-identity is not yet known. All other ES4 changes are deterministic functions of TF3 and the release. TF3's
 > validation score is 0.00196 (0.22 %) below that of ES4.
 
 ### Environment
 
 | Package | Version | Licence |
 | --- | --- | --- |
+| Python | 3.12.3 | PSF-2.0 |
 | numpy | 2.5.3 | BSD-3-Clause |
 | pandas | 3.0.6 | BSD-3-Clause |
 | scipy | 1.18.1 | BSD-3-Clause |
@@ -317,17 +326,26 @@ under `<out>/cache` (or `--cache-root`). Other shells can be applied with `--she
 | lightgbm | 4.7.0 | MIT |
 | scikit-learn | 1.9.1 | BSD-3-Clause |
 
-**Hardware and runtime.** All production runs used one AWS EC2 `r7i.2xlarge` instance (8 vCPU, 64 GiB RAM, Ubuntu
-with glibc 2.39). The clean TF3 regeneration took **1 h 33 min** with `--threads 6`, including rebuilding every cache
-from the release. Allow ample free disk for the release and the caches; the reference instance had about 70 GiB free.
+**Hardware and runtime.** All production runs used one AWS EC2 `r7i.2xlarge` instance (8 vCPU, 64 GiB RAM, no GPU,
+Ubuntu with glibc 2.39). The clean TF3 regeneration took **1 h 33 min** with `--threads 6`, including rebuilding every
+cache from the release. Regenerating ES4 is estimated at about 3 hours or less, and both files at about 4.5 hours or
+less; neither total has yet been measured as one run. Peak memory was not recorded. We recommend at least 40 GiB of free
+disk.
+
+**Kaggle Notebook.** The method cannot be run inside a Kaggle Notebook as packaged and was never run in one, so we
+provide this repository and a [written account](REPRODUCIBILITY.md#2-hardware-runtime-and-the-kaggle-notebook-position)
+of how it was run.
 
 ### Seeds
 
 | Component | Seed |
 | --- | --- |
 | TS3 members | 20261104 and 20261204, each plus the panel index, as `random_state` for row sampling |
-| RS1 development samples | 20261001 plus the panel index |
+| RS1 models and development samples | LightGBM seed 20261001; samples use 20261001 plus the panel index |
+| Q46 training windows | 20261046 plus the panel index |
+| Q46 and EQ1 classifiers | LightGBM seed 20261002 |
 | EQ1 additional training windows | 20261240 plus the panel index |
+| S10 flow factor model at inference | 20261003 + 100 × panel index + month |
 
 ### Checksums
 
@@ -378,7 +396,9 @@ column of a frozen, checksum-verified parent and were verified by a row-level co
 
 ```text
 .
-├── reproduce.py                    # single entry point: verify, regenerate TF3, regenerate the ES4 shell
+├── reproduce.py                    # single entry point: verify, regenerate TF3, ES4 or both
+├── REPRODUCIBILITY.md              # runtime, hardware, versions, preprocessing, seeds, licences, commands
+├── THIRD_PARTY_NOTICES.md          # licence notice for the organizers' merge helper
 ├── requirements.txt                # pinned inference environment
 ├── submissions/                    # the two final archives (Git LFS)
 │   ├── submission_TF3.zip
@@ -386,7 +406,8 @@ column of a frozen, checksum-verified parent and were verified by a row-level co
 ├── vendor/
 │   └── reproduction_TF3.zip        # frozen TF3 inference code, 92 saved models, evidence, manifest (Git LFS)
 ├── code/
-│   └── recenter_short_gaps.py      # the ES4 short-gap speed edit
+│   ├── regenerate_es4.py           # driver for the whole ES4 chain, with row-level checks
+│   └── es_chain/                   # the original ES1 to ES4 stage scripts, unedited, and the Q46 window inventory
 ├── tfb/                            # research toolkit (see below)
 ├── docs/
 │   ├── TrafficFlowBench_Final_Report.pdf   # the final report

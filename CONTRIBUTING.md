@@ -89,7 +89,8 @@ python reproduce.py                   # must print OK three times
 | Path | Contents | Editable? |
 | --- | --- | --- |
 | `reproduce.py` | Single entry point | Yes, carefully: keep the checksums and default behaviour |
-| `code/` | The ES4 short-gap edit | Bug fixes only; the edit's logic is part of a submitted file |
+| `code/regenerate_es4.py` | Driver for the ES4 chain | Bug fixes only |
+| `code/es_chain/` | The original ES1 to ES4 stage scripts and Q46 inventory | **No**; they are what built the submitted files |
 | `tfb/` | Research toolkit from the competition | Yes; prefer new modules to rewriting historical ones |
 | `vendor/reproduction_TF3.zip` | Frozen TF3 inference code and weights | **No** |
 | `submissions/` | The two selected archives | **No** |

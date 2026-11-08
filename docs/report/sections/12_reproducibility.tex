@@ -4,8 +4,15 @@
 \subsection{Environment and hardware}
 All production runs used CPU only on one AWS EC2 \code{r7i.2xlarge} instance (8 vCPU, 64 GiB RAM, Ubuntu with glibc
 2.39) and Python 3.12.3 with the pinned packages in \cref{tab:env}. No GPU is needed. The clean regeneration of TF3
-took 1 h 33 min with six threads, including rebuilding every cache from the raw release. The release and the
-regenerated caches need substantial free disk; the reference instance had about 70 GiB free.
+took 1 h 33 min with six threads, including rebuilding every cache from the raw release. Regenerating ES4 is estimated
+at about 3 hours or less and both files at about 4.5 hours or less; neither total has been measured as one run. Peak
+memory was not recorded, so 64 GiB is what was used and not a proven minimum. The release is 7.76 GiB as a zip file, its
+dense caches take 4.1 GiB, and we recommend at least 40 GiB of free disk.
+
+\paragraph{Kaggle Notebook} The method cannot be run inside a Kaggle Notebook as packaged and was never run in one. It
+was developed and operated as a chain of command-line stages under an exact pinned environment on a larger machine than
+a standard notebook provides. We therefore supply a repository and a written account of how it was run,
+\code{REPRODUCIBILITY.md}, which lists the versions, preprocessing steps, seeds, commands and verification status.
 
 \begin{table}[h]
 \centering\small
@@ -40,9 +47,13 @@ python -m pip install -r requirements.txt
 python reproduce.py --submission tf3 --release-root /path/to/release \
                     --out /path/to/new_tf3 --threads 6
 
-# 3. regenerate the last ES4 speed shell (gaps 3-6) from its parent, ES3
+# 3. regenerate ES4 from the raw release, including EQ1 retraining
 python reproduce.py --submission es4 --release-root /path/to/release \
-                    --parent /path/to/submission_ES3.zip --out /path/to/new_es4
+                    --out /path/to/new_es4 --threads 6
+
+# 4. regenerate both selected files, sharing one set of caches
+python reproduce.py --submission all --release-root /path/to/release \
+                    --out /path/to/new_all --threads 6
 \end{verbatim}
 \end{minipage}
 
@@ -52,11 +63,14 @@ python reproduce.py --submission es4 --release-root /path/to/release \
         and the saved TRAIN weights, then compares all 6,980,503 rows with the submitted file. On the clean run every queue
         label matched exactly and the largest continuous difference was $1.82\times10^{-12}$. This verifies saved-weight
         inference; the refit procedure, seeds and inventories are recorded, but an independent retraining was not run.
-  \item \textbf{ES4.} The final archive is in the repository and its checksum is verified by \code{reproduce.py}. ES4
-        equals ES3 plus the gap 3--6 shell, which \code{code/recenter\_short\_gaps.py} regenerates from ES3. The
-        intermediate archives ES1 to ES3 and the all-month ongoing classifier EQ1 are not in this repository, so ES4 is
-        not regenerated end to end from the release by this repository alone. TF3, which is, scored 0.00196 (0.22\,\%)
-        below ES4 on the validation month.
+  \item \textbf{ES4.} The final archive is in the repository and its checksum is verified by \code{reproduce.py}.
+        Row-level comparison confirms that ES4 is TF3 plus 247 ongoing-queue labels and 5,825,667 recentered speeds.
+        \code{code/regenerate\_es4.py} runs the original stage scripts from the release through ES1, ES2, ES3 and ES4 and
+        compares every row with the frozen file. It has been exercised on synthetic data but \textbf{has not yet been run
+        on the real release}. The EQ1 classifier weights existed only on the instance used during the competition, which
+        no longer exists, so the command retrains EQ1 from the release; whether that model is identical to the original
+        is not yet known. Only the 247 EQ1-dependent labels depend on this. TF3 scored 0.00196 (0.22\,\%) below ES4 on the
+        validation month.
 \end{itemize}
 
 \subsection{Artefacts and checksums}
@@ -81,8 +95,10 @@ EQ1 ongoing classifier, 800 trees (ES4) & \sha{cb626813e621064594f6956344df81d7d
 
 \subsection{Seeds and data membership}
 TS3 members draw their training rows with \code{random\_state} equal to the member seed (20261104 or 20261204) plus
-the panel index; the RS1 development samples used 20261001 plus the panel index; EQ1's additional windows used
-20261240 plus the panel index. The fit manifests in the TF3 bundle record the fitting months, row counts and input
+the panel index; the RS1 models use LightGBM seed 20261001 and samples drawn with 20261001 plus the panel index; Q46's
+training windows use 20261046 plus the panel index; EQ1's additional windows use 20261240 plus the panel index; both
+classifiers use LightGBM seed 20261002. At inference, the only seed is the S10 randomized start, $20261003 + 100\times$
+panel index $+$ month. The fit manifests in the TF3 bundle record the fitting months, row counts and input
 hashes of every saved model, and two independent audits recomputed every stored weekday profile (31,783,763 fitting
 rows) exactly.
 

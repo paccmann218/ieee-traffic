@@ -62,8 +62,8 @@ instruments are weakest.
         rules allow, and so leaves the queue-age signal unused.
   \item The local physics proxy uses observed accumulation in place of the withheld boundary flux and is not the
         official physics score.
-  \item ES4 regenerates from the release only up to its parent: the all-month classifier weights behind ES1 are not in
-        this repository (\cref{sec:repro}).
+  \item The all-month classifier weights behind ES1 were not preserved, so regenerating ES4 retrains that model; whether
+        the result is identical to the original has not yet been tested (\cref{sec:repro}).
 \end{itemize}
 
 \subsection{Future work}
